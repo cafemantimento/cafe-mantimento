@@ -1,0 +1,14 @@
+Coloque aqui as fotos (JPG) com estes nomes:
+
+Do Instagram @buffetidealzonta:
+  hero-1.jpg ... hero-4.jpg       -> abertura (horizontais, ~1920px)
+  sobre-1.jpg, sobre-2.jpg        -> "Nossa história"
+  salao-1.jpg ... salao-6.jpg     -> galeria do Salão Ideal
+  ig-1.jpg ... ig-6.jpg           -> grade do Instagram (quadradas)
+
+Do Instagram @fazenda_jaragua:
+  fazenda-1.jpg ... fazenda-6.jpg -> galeria da Fazenda Jaraguá
+
+As fotos salao-1..3 e fazenda-1..3 também aparecem na "película" (cenas em rolagem).
+As legendas ficam no início do <script> em index.html (const SPACES).
+Enquanto uma foto não existir, o site mostra um fundo dourado no lugar.
