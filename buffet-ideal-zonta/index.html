@@ -274,7 +274,43 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 .lb .cap p{margin-inline:auto}
 .lb .arrows{padding:0 clamp(8px,2vw,24px)}
 
+/* ===== rolagem cinematográfica ===== */
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis.lenis-stopped{overflow:hidden}
+.progress{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));transform-origin:left;transform:scaleX(0);z-index:150;pointer-events:none}
+.hero .slides{will-change:transform,filter}
+.hero .wrap{will-change:transform,opacity}
+.lbar{position:absolute;left:0;right:0;height:0;background:#000;z-index:4;pointer-events:none}
+.lbar.t{top:0}.lbar.b{bottom:0}
+.h2.rv{opacity:1;transform:translateY(30px);clip-path:inset(0 0 100% 0);transition:clip-path 1.3s var(--ease),transform 1.3s var(--ease)}
+.h2.rv.in{clip-path:inset(-10% -5% -20% -5%);transform:none}
+[data-speed]{will-change:transform}
+
+/* película: cenas em rolagem horizontal fixada */
+.reel{position:relative;height:420vh;background:var(--bg)}
+.reel .pin{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:clamp(20px,4vh,40px)}
+.reel .pin::before,.reel .pin::after{content:"";position:absolute;left:0;width:400%;height:26px;background:radial-gradient(circle,rgba(244,234,216,.13) 3.5px,transparent 4.5px) 0 50%/30px 26px repeat-x;transform:translateX(var(--holes,0));pointer-events:none}
+.reel .pin::before{top:max(70px,8vh)}.reel .pin::after{bottom:max(18px,4vh)}
+.reel .head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
+.reel .head .h2{margin:10px 0 0}
+.reel .num{white-space:nowrap;font-family:var(--serif);font-size:clamp(3rem,8vw,6rem);line-height:.8;color:var(--gold2);font-variant-numeric:tabular-nums}
+.reel .num small{font-size:.35em;color:var(--mute)}
+.reel .strip{display:flex;gap:clamp(16px,3vw,40px);padding:0 max(16px,calc((100vw - 1200px)/2));width:max-content;will-change:transform}
+.shot{flex:none;width:clamp(270px,min(58vw,88svh),760px);position:relative}
+.shot .box{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--card)}
+.shot .box .ph{position:absolute;inset:0 -12%;will-change:transform}
+.shot figcaption{display:flex;gap:16px;align-items:baseline;margin-top:14px}
+.shot figcaption small{font-size:.65rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.shot figcaption b{font-family:var(--serif);font-weight:400;font-size:clamp(1.2rem,2.4vw,1.8rem)}
+.shot .tag{position:absolute;top:14px;left:14px;z-index:1;font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;padding:6px 10px;background:rgba(13,11,9,.6);backdrop-filter:blur(6px);border:1px solid var(--ln)}
+.shot.end{width:clamp(260px,40vw,480px);display:flex;flex-direction:column;justify-content:center;gap:22px}
+.shot.end p{font-family:var(--serif);font-style:italic;font-size:clamp(1.6rem,3.4vw,2.6rem);line-height:1.15}
+@media (max-width:640px){.reel .num{font-size:2.6rem}.reel{height:520vh}.shot{width:80vw}.shot .box{aspect-ratio:4/5}.shot.end{width:78vw}}
+.spaces{will-change:clip-path}
+
 @media (prefers-reduced-motion:reduce){
+  .reel{height:auto}.reel .pin{position:static;height:auto;padding:80px 0}.reel .strip{overflow-x:auto;width:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .intro{display:none}
 }
@@ -286,6 +322,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
   <defs><linearGradient id="partial"><stop offset="80%" stop-color="#d4a85a"/><stop offset="80%" stop-color="rgba(212,168,90,.25)"/></linearGradient></defs>
 </svg>
 
+<div class="progress" id="progress" aria-hidden="true"></div>
 <div class="intro" aria-hidden="true"><span>Buffet Ideal Zonta</span></div>
 
 <header class="nav" id="nav">
@@ -306,7 +343,8 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 <main>
 <section class="hero bars" id="topo">
   <div class="slides" id="heroSlides"></div>
-  <div class="wrap">
+  <i class="lbar t" id="lbT"></i><i class="lbar b" id="lbB"></i>
+  <div class="wrap" id="heroTxt">
     <div class="eyebrow fadein d1">Santa Gertrudes · SP</div>
     <h1><span class="ln"><span>Momentos</span></span><span class="ln"><span><em>inesquecíveis</em></span></span></h1>
     <p class="lead fadein d2">Casamentos, formaturas, aniversários e eventos corporativos com a assinatura do Buffet Ideal Zonta — no nosso salão ou na encantadora Fazenda Jaraguá.</p>
@@ -328,7 +366,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
     <div class="pic rv">
       <div class="badge"><div><b>2005</b><small>desde</small></div></div>
       <div class="ph" data-src="fotos/sobre-1.jpg"></div>
-      <div class="ph" data-src="fotos/sobre-2.jpg"></div>
+      <div class="ph" data-src="fotos/sobre-2.jpg" data-speed="-.12"></div>
     </div>
     <div>
       <div class="eyebrow rv">Nossa história</div>
@@ -341,6 +379,16 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
         <div><b data-count="303">0</b><small>avaliações</small></div>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="reel" id="cenas" aria-label="Cenas dos nossos espaços">
+  <div class="pin">
+    <div class="wrap head">
+      <div><div class="eyebrow">Em cena</div><h2 class="h2 rv">Dois cenários, <em>uma assinatura</em></h2></div>
+      <div class="num" aria-hidden="true"><span id="reelN">01</span><small> / <span id="reelT">06</span></small></div>
+    </div>
+    <div class="strip" id="strip"></div>
   </div>
 </section>
 
@@ -405,7 +453,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
 <section class="sec rating rv" id="avaliacoes">
   <div class="wrap">
     <div class="eyebrow" style="justify-content:center">Avaliação no Google</div>
-    <div class="big" data-count="4.8" data-dec="1">0</div>
+    <div class="big" data-count="4.8" data-dec="1" data-speed=".08">0</div>
     <div class="stars" aria-label="4,8 de 5 estrelas">
       <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9z"/></svg>
       <svg viewBox="0 0 24 24"><path d="M12 2l3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9z"/></svg>
@@ -471,6 +519,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;
   <div class="cap show" id="lbCap"></div>
 </div>
 
+<script src="js/lenis.min.js"></script>
 <script>
 /* ===== CONTEÚDO EDITÁVEL =====
    Coloque as fotos na pasta "fotos/" com os nomes abaixo (ou troque os caminhos).
@@ -556,9 +605,11 @@ $("#marq").innerHTML = half + half;
 const io = new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return;
   e.target.classList.add("in"); io.unobserve(e.target);
+  $$(":scope > .h2.rv", e.target).forEach(h => h.classList.add("in"));
   $$("[data-count]", e.target).concat(e.target.matches("[data-count]") ? [e.target] : []).forEach(count);
 }), { threshold: .15 });
-$$(".rv").forEach(el => io.observe(el));
+// headings are fully clipped before reveal, which hides them from the observer: watch their parent
+$$(".rv").forEach(el => io.observe(el.matches(".h2") ? el.parentElement : el));
 function count(el) {
   if (el.dataset.done) return; el.dataset.done = 1;
   const to = +el.dataset.count, dec = +(el.dataset.dec || 0), suf = el.dataset.suffix || "", t0 = performance.now(), dur = 1800;
@@ -617,7 +668,7 @@ function movePill() {
 }
 addEventListener("resize", movePill);
 $$("#tabs button").forEach(b => b.onclick = () => b.dataset.space !== cur && build(b.dataset.space));
-$$("#doors .door").forEach(d => d.onclick = () => { build(d.dataset.go); $("#explorer").scrollIntoView({ behavior: "smooth" }); });
+$$("#doors .door").forEach(d => d.onclick = () => { build(d.dataset.go); scrollToEl($("#explorer")); });
 $("#prev").onclick = e => { e.stopPropagation(); go(idx - 1); restart(); };
 $("#next").onclick = e => { e.stopPropagation(); go(idx + 1); restart(); };
 swipe($("#viewer"), d => { go(idx + d); restart(); }, () => openLB());
@@ -645,21 +696,92 @@ function lbShow() {
   setTimeout(() => { lbImg.style.opacity = 1; lbImg.style.transform = "none"; }, 60);
   $("#lbCap").innerHTML = `<h3>${f[1]}</h3><p>${f[2]}</p>`;
 }
-function openLB() { clearInterval(timer); lbShow(); lb.classList.add("on"); document.body.style.overflow = "hidden"; $("#lbX").focus(); }
+function openLB() { clearInterval(timer); lenis && lenis.stop(); lbShow(); lb.classList.add("on"); document.body.style.overflow = "hidden"; $("#lbX").focus(); }
 function closeLB() { lb.classList.remove("on"); document.body.style.overflow = ""; go(idx); restart(); }
-$("#lbX").onclick = closeLB;
+$("#lbX").onclick = () => { closeLB(); lenis && lenis.start(); };
 $("#lbPrev").onclick = () => { idx = (idx - 1 + SPACES[cur].fotos.length) % SPACES[cur].fotos.length; lbShow(); };
 $("#lbNext").onclick = () => { idx = (idx + 1) % SPACES[cur].fotos.length; lbShow(); };
 swipe($("#lbPic"), d => (d > 0 ? $("#lbNext") : $("#lbPrev")).onclick());
 addEventListener("keydown", e => {
   if (lb.classList.contains("on")) {
-    if (e.key === "Escape") closeLB();
+    if (e.key === "Escape") $("#lbX").onclick();
     if (e.key === "ArrowRight") $("#lbNext").onclick();
     if (e.key === "ArrowLeft") $("#lbPrev").onclick();
   }
 });
 
 build("salao");
+
+/* ===== rolagem cinematográfica ===== */
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+var lenis = null;
+if (!calm && window.Lenis) {
+  lenis = new Lenis({ duration: 1.35, easing: t => 1 - Math.pow(1 - t, 4) });
+  (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(performance.now());
+}
+function scrollToEl(el) {
+  if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.8 });
+  else el.scrollIntoView({ behavior: "smooth" });
+}
+$$('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
+  const t = $(a.getAttribute("href")); if (!t) return;
+  e.preventDefault(); scrollToEl(t);
+}));
+
+// película: cenas alternando Salão e Fazenda
+const strip = $("#strip"), scenes = [];
+for (let i = 0; i < 3; i++) for (const k of ["salao", "fazenda"]) scenes.push([k, SPACES[k].fotos[i]]);
+scenes.forEach(([k, f], i) => {
+  const fig = mk("figure", "shot"), box = mk("div", "box");
+  box.innerHTML = `<span class="tag">${SPACES[k].nome}</span>`;
+  box.appendChild(photo(mk("div"), f[0], SPACES[k].farm));
+  fig.appendChild(box);
+  fig.insertAdjacentHTML("beforeend", `<figcaption><small>Cena ${String(i + 1).padStart(2, "0")}</small><b>${f[1]}</b></figcaption>`);
+  fig.style.cursor = "pointer";
+  fig.onclick = () => { build(k); go(SPACES[k].fotos.indexOf(f)); scrollToEl($("#explorer")); };
+  strip.appendChild(fig);
+});
+const endCard = mk("div", "shot end");
+endCard.innerHTML = `<p>Qual será o cenário da sua festa?</p><a class="btn fill" href="#espacos">Explorar os espaços</a>`;
+endCard.querySelector("a").onclick = e => { e.preventDefault(); scrollToEl($("#espacos")); };
+strip.appendChild(endCard);
+$("#reelT").textContent = String(scenes.length).padStart(2, "0");
+
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const heroImg = $("#heroSlides"), heroTxt = $("#heroTxt"), reel = $("#cenas"), pin = $(".pin", reel), spacesSec = $("#espacos");
+const shots = $$(".shot .box .ph", strip), speeds = $$("[data-speed]");
+function frame() {
+  const y = scrollY, vh = innerHeight;
+  $("#progress").style.transform = `scaleX(${y / (document.documentElement.scrollHeight - vh || 1)})`;
+  if (calm) return;
+  // hero: a câmera se afasta e as tarjas pretas fecham a cena
+  const p = clamp01(y / vh);
+  heroImg.style.transform = `scale(${1 + p * .18}) translateY(${p * 12}vh)`;
+  heroImg.style.filter = `blur(${p * 6}px) brightness(${1 - p * .55})`;
+  heroTxt.style.transform = `translateY(${-p * 140}px)`;
+  heroTxt.style.opacity = 1 - p * 1.4;
+  $("#lbT").style.height = $("#lbB").style.height = (p * 14) + "vh";
+  // película horizontal
+  const r = reel.getBoundingClientRect(), span = reel.offsetHeight - vh;
+  const q = clamp01(-r.top / span), dist = strip.scrollWidth - innerWidth;
+  strip.style.transform = `translateX(${-q * dist}px)`;
+  pin.style.setProperty("--holes", (-q * dist * .5) + "px");
+  shots.forEach(s => {
+    const b = s.parentNode.getBoundingClientRect(), c = (b.left + b.width / 2) / innerWidth - .5;
+    s.style.transform = `translateX(${-c * 10}%) scale(1.05)`;
+  });
+  $("#reelN").textContent = String(Math.min(scenes.length, 1 + Math.floor(q * scenes.length * .999))).padStart(2, "0");
+  // espaços: a tela "abre" ao entrar
+  const sr = spacesSec.getBoundingClientRect(), z = clamp01(1 - sr.top / vh);
+  const inset = (1 - z) * 7;
+  spacesSec.style.clipPath = z >= 1 ? "none" : `inset(0 ${inset}% round ${(1 - z) * 40}px)`;
+  // paralaxe
+  speeds.forEach(el => {
+    const b = el.getBoundingClientRect(), c = b.top + b.height / 2 - vh / 2;
+    el.style.transform = `translateY(${c * +el.dataset.speed}px)`;
+  });
+}
+(function loop() { frame(); requestAnimationFrame(loop); })();
 </script>
 </body>
 </html>
