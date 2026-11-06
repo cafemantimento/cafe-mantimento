@@ -9,16 +9,12 @@
 
 Para gerar de novo: `npm i three@0.160.0 @fontsource/fredoka @fontsource/baloo-2`, depois `bash voice.sh && python3 audio.py && node render.js full`.
 
-## Convite digital (abre e rola)
+## Convite digital (telas que deslizam)
 
 - `convite-aniversario.html` (ou `site/index.html`, idêntico): um arquivo só, com fontes e música embutidas.
 - Para publicar: arraste a pasta `site/` no Netlify Drop (app.netlify.com/drop) e mande o link.
 
-Visual: luau havaiano entre as estrelas, em azul, rosa e turquesa, com planeta, disco voador, lua, coqueiros, pranchas de surfe, ukulele, flores e mar animado.
-Fluxo: envelope azul com selo de hibisco, toca e abre com confete e música. Depois vêm: ilha com a imagem de destaque, "Aloha! Você está convidado para o aniversário de [nome]", idade numa prancha, cartão de embarque (data, horário, local e contagem regressiva), Onde vai ser (Google Maps, Waze), Confirme presença (WhatsApp), Sugestões de presentes (WhatsApp), Dúvidas (WhatsApp) e "Esperamos você!". Há um menu fixo embaixo e um botão de música.
+Visual: praia ao pôr do sol em rosa, lilás e turquesa, com mar animado, hibiscos na frente, folhas de coqueiro, pétalas caindo e brilhos.
+Telas: 1) envelope turquesa com selo roxo que abre com fumaça rosa e mostra "Convite Especial"; 2) foto em moldura ondulada, nome e faixa roxa com a idade; 3) mensagem; 4) moldura com data, horário e contagem regressiva; 5) local (Google Maps e Waze); 6) confirmar presença (WhatsApp); 7) sugestões de presentes (WhatsApp); 8) "Esperamos você!" e WhatsApp para dúvidas.
 
-Para preencher, edite o bloco `CONVITE` ("EDITE AQUI") perto do fim do arquivo:
-- `nome`, `idade`, `data` (AAAA-MM-DD), `hora` (HH:MM)
-- `imagemDestaque`: nome do arquivo da imagem grande (PNG sem fundo), colocado na mesma pasta do `index.html`
-- `foto`: foto redonda da criança
-- `localNome`, `localEndereco`, `enderecoMapa`, `whatsapp`, `presentes`
+Para preencher, edite o bloco `CONVITE` ("EDITE AQUI") perto do fim do arquivo: `nome`, `idade`, `data` (AAAA-MM-DD), `hora` (HH:MM), `foto`, `imagens` (abertura, nome, mensagem, final: arquivos PNG sem fundo na mesma pasta), local, WhatsApp e `presentes`.
