@@ -8,3 +8,15 @@
   - `render.js`: renderiza quadro a quadro com Playwright e codifica com ffmpeg.
 
 Para gerar de novo: `npm i three@0.160.0 @fontsource/fredoka @fontsource/baloo-2`, depois `bash voice.sh && python3 audio.py && node render.js full`.
+
+## Convite interativo (página com botões)
+
+- `convite-aniversario.html`: arquivo único (tudo embutido), basta abrir no celular ou enviar o arquivo.
+- `site/`: a mesma página separada em arquivos, pronta para hospedar (por exemplo, GitHub Pages ou Netlify).
+
+Como funciona: o convidado toca no envelope, o personagem cai do céu e fala o convite (com música e legenda no balão), e depois aparecem os cartões com botões:
+- **Mapa** e **Ver** (avaliações): abrem o Google Maps no endereço da Papelaria Central.
+- **Chamar**: abre conversa no WhatsApp (19) 97137-6208.
+- **😘 Beijinho**: o personagem manda um beijo com corações.
+- **💌 Enviar**: compartilha o link do convite.
+- **🔁 De novo**: repete a animação. Tocar no personagem faz ele pular ou girar com confete.
