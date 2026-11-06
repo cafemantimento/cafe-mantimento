@@ -9,18 +9,11 @@
 
 Para gerar de novo: `npm i three@0.160.0 @fontsource/fredoka @fontsource/baloo-2`, depois `bash voice.sh && python3 audio.py && node render.js full`.
 
-## Convite interativo (página que abre e rola)
+## Convite digital (abre e rola)
 
-- `convite-aniversario.html`: arquivo único com tudo embutido.
-- `site/`: a mesma página separada em arquivos, pronta para hospedar (Netlify Drop, GitHub Pages).
+- `convite-aniversario.html` (ou `site/index.html`, idêntico): um arquivo só, com fontes e música embutidas.
+- Para publicar: arraste a pasta `site/` no Netlify Drop (app.netlify.com/drop) e mande o link.
 
-Fluxo: toca no envelope, o convite abre, o mascote fala o convite com música, e aparece "Arraste para baixo". Rolando, vêm as seções:
-1. Convite ("Vem pra festa!")
-2. Onde vai ser: Papelaria Central, endereço, mapa e botões Google Maps e Waze
-3. Confirmar presença: nome e quantidade de pessoas, enviado pelo WhatsApp
-4. Sugestões de presentes: a pessoa marca o que vai dar e avisa pelo WhatsApp
-5. WhatsApp (19) 97137-6208
-6. Avaliação 5,0 (13 avaliações)
-7. Esperamos você! (beijinho, enviar convite, ver de novo)
+Fluxo: envelope com selo de flor, toca e abre, aparece o cartão "Aloha! Você está convidado", com foto, nome, idade, data, horário e contagem regressiva. Depois vêm: Onde vai ser (Papelaria Central, Google Maps, Waze, avaliações), Confirme presença (WhatsApp), Sugestões de presentes (WhatsApp), Dúvidas (WhatsApp) e "Esperamos você!". Há um menu fixo embaixo e um botão de música.
 
-Para mudar a lista de presentes ou o WhatsApp, edite o bloco `window.CONVITE` ("EDITE AQUI") no `index.html`.
+Para preencher nome, idade, data, horário, foto e presentes, edite o bloco `CONVITE` ("EDITE AQUI") perto do fim do arquivo.
