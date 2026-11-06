@@ -14,6 +14,11 @@ Para gerar de novo: `npm i three@0.160.0 @fontsource/fredoka @fontsource/baloo-2
 - `convite-aniversario.html` (ou `site/index.html`, idêntico): um arquivo só, com fontes e música embutidas.
 - Para publicar: arraste a pasta `site/` no Netlify Drop (app.netlify.com/drop) e mande o link.
 
-Fluxo: envelope com selo de flor, toca e abre, aparece o cartão "Aloha! Você está convidado", com foto, nome, idade, data, horário e contagem regressiva. Depois vêm: Onde vai ser (Papelaria Central, Google Maps, Waze, avaliações), Confirme presença (WhatsApp), Sugestões de presentes (WhatsApp), Dúvidas (WhatsApp) e "Esperamos você!". Há um menu fixo embaixo e um botão de música.
+Visual: luau havaiano entre as estrelas, em azul, rosa e turquesa, com planeta, disco voador, lua, coqueiros, pranchas de surfe, ukulele, flores e mar animado.
+Fluxo: envelope azul com selo de hibisco, toca e abre com confete e música. Depois vêm: ilha com a imagem de destaque, "Aloha! Você está convidado para o aniversário de [nome]", idade numa prancha, cartão de embarque (data, horário, local e contagem regressiva), Onde vai ser (Google Maps, Waze), Confirme presença (WhatsApp), Sugestões de presentes (WhatsApp), Dúvidas (WhatsApp) e "Esperamos você!". Há um menu fixo embaixo e um botão de música.
 
-Para preencher nome, idade, data, horário, foto e presentes, edite o bloco `CONVITE` ("EDITE AQUI") perto do fim do arquivo.
+Para preencher, edite o bloco `CONVITE` ("EDITE AQUI") perto do fim do arquivo:
+- `nome`, `idade`, `data` (AAAA-MM-DD), `hora` (HH:MM)
+- `imagemDestaque`: nome do arquivo da imagem grande (PNG sem fundo), colocado na mesma pasta do `index.html`
+- `foto`: foto redonda da criança
+- `localNome`, `localEndereco`, `enderecoMapa`, `whatsapp`, `presentes`
