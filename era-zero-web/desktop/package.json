@@ -1,0 +1,29 @@
+{
+  "name": "era-zero",
+  "productName": "Era Zero",
+  "version": "1.0.0",
+  "description": "Era Zero — sobrevivência em mundo aberto",
+  "main": "main.js",
+  "author": "Era Zero",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "electron . --smoke-test",
+    "dist:win": "electron-builder --win nsis portable --publish never",
+    "dist:linux": "electron-builder --linux AppImage --publish never"
+  },
+  "devDependencies": {
+    "electron": "30.0.9",
+    "electron-builder": "24.13.3"
+  },
+  "build": {
+    "appId": "com.erazero.game",
+    "productName": "Era Zero",
+    "directories": { "output": "release" },
+    "files": ["main.js", "app/**/*"],
+    "win": { "icon": "app/icons/icon.ico", "target": ["nsis", "portable"] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "shortcutName": "Era Zero", "artifactName": "EraZero-Instalador-${version}.exe" },
+    "portable": { "artifactName": "EraZero-Portatil-${version}.exe" },
+    "linux": { "icon": "app/icons/icon-512.png", "category": "Game", "artifactName": "EraZero-${version}.AppImage" }
+  }
+}

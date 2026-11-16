@@ -1,0 +1,104 @@
+name: Era Zero - compilar e publicar
+
+on:
+  push:
+    branches: [claude/vibrant-faraday-b9hlhl]
+    paths: ['era-zero-web/**', '.github/workflows/era-zero-build.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: era-zero-build
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Versão web (PWA)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 era-zero-web/tools/build.py era-zero-web/dist
+      - run: cd era-zero-web/dist && zip -qr ../../EraZero-Web.zip .
+      - uses: actions/upload-artifact@v4
+        with: { name: web-dist, path: era-zero-web/dist }
+      - uses: actions/upload-artifact@v4
+        with: { name: EraZero-Web, path: EraZero-Web.zip }
+
+  desktop-smoke:
+    name: Teste do app de computador
+    needs: web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: web-dist, path: era-zero-web/desktop/app }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: cd era-zero-web/desktop && npm install --no-audit --no-fund
+      - run: cd era-zero-web/desktop && xvfb-run -a npx electron . --smoke-test --no-sandbox | tee smoke.log && grep -q SMOKE_OK smoke.log
+
+  windows:
+    name: Windows (instalador e portátil)
+    needs: web
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: web-dist, path: era-zero-web/desktop/app }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: cd era-zero-web/desktop && npm install --no-audit --no-fund
+      - run: cd era-zero-web/desktop && npx electron-builder --win nsis portable --publish never
+        env: { CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
+      - uses: actions/upload-artifact@v4
+        with: { name: EraZero-Windows, path: 'era-zero-web/desktop/release/*.exe' }
+
+  android:
+    name: Android (APK)
+    needs: web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: web-dist, path: era-zero-web/mobile/www }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: cd era-zero-web/mobile && npm install --no-audit --no-fund
+      - run: cd era-zero-web/mobile && npx cap add android && npx cap sync android
+      - run: cd era-zero-web/mobile && npx capacitor-assets generate --android --iconBackgroundColor '#05090d' --iconBackgroundColorDark '#05090d' --splashBackgroundColor '#05090d' --splashBackgroundColorDark '#05090d'
+      - name: Tela deitada
+        run: sed -i 's/<activity /<activity android:screenOrientation="sensorLandscape" /' era-zero-web/mobile/android/app/src/main/AndroidManifest.xml
+      - run: cd era-zero-web/mobile/android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - run: cp era-zero-web/mobile/android/app/build/outputs/apk/debug/app-debug.apk EraZero-Android.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: EraZero-Android, path: EraZero-Android.apk }
+
+  release:
+    name: Publicar downloads
+    needs: [web, desktop-smoke, windows, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: out }
+      - run: ls -R out | head -50
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: era-zero-latest
+          name: Era Zero — última versão
+          prerelease: true
+          make_latest: false
+          target_commitish: ${{ github.sha }}
+          body: |
+            Arquivos gerados automaticamente a partir do commit ${{ github.sha }}.
+
+            - **Windows:** `EraZero-Instalador-*.exe` (instala com atalho) ou `EraZero-Portatil-*.exe` (roda sem instalar). O Windows pode avisar "editor desconhecido" porque o app não tem assinatura digital paga: clique em "Mais informações" → "Executar assim mesmo".
+            - **Android:** `EraZero-Android.apk`. No celular, permita "instalar apps de fontes desconhecidas" para o navegador ou o gerenciador de arquivos e abra o APK.
+            - **Web:** `EraZero-Web.zip` (versão PWA para hospedar em qualquer site).
+          files: |
+            out/EraZero-Windows/*.exe
+            out/EraZero-Android/EraZero-Android.apk
+            out/EraZero-Web/EraZero-Web.zip

@@ -1,0 +1,14 @@
+{
+  "name": "era-zero-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Era Zero para Android (Capacitor)",
+  "dependencies": {
+    "@capacitor/android": "6.1.2",
+    "@capacitor/core": "6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "6.1.2"
+  }
+}

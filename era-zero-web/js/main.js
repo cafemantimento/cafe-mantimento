@@ -52,5 +52,16 @@ async function boot(){
   setLoading(1,'Pronto');await nextFrame();
   applyDay();renderQuests();refreshHeld();$('loading').style.display='none';setState('menu');requestAnimationFrame(frame);
   window.__eraZero={updateForges,updateEvents,hitNode,hitCreature,openChest,chests,interactables,useTreasureMap,treasureAt,digTreasure,startMeteor,EVENT,pieces,placePiece,forges,ITEMS,QUALITY,SETTINGS,applyQuality,serialize,G,P,nodes,creatures,pieces,setState,newGame,load,save,give:(id,n)=>invAdd(id,n),H,camera,NET,VIEW,MOUSE,WEATHER,SPECIES,makeCreature,biomeAt,POIS,CAVES,enterCave,exitCave,setWeather,unlockAch,PROFILE:()=>PROFILE,EFX,equipItem,upsertPeerForTest:upsertPeer};
-  netInit();cloudInit();window.__eraZero.ready=true;}
+  netInit();cloudInit();registerSW();window.__eraZero.ready=true;}
+// ---------------- versão instalável: offline, atualizações e botão de instalar
+function standalone(){return /^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&!!document.querySelector('link[rel=manifest]');}
+function registerSW(){if(!('serviceWorker' in navigator)||!standalone())return;
+  navigator.serviceWorker.register('sw.js').then(reg=>{const watch=w=>w&&w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)showUpdate(w);});
+    if(reg.waiting&&navigator.serviceWorker.controller)showUpdate(reg.waiting);reg.addEventListener('updatefound',()=>watch(reg.installing));setInterval(()=>reg.update().catch(()=>{}),30*60*1000);}).catch(()=>{});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!wantReload)return;wantReload=false;location.reload();});}
+let wantReload=false;
+function showUpdate(w){$('updBar').style.display='block';$('bUpd').onclick=()=>{if(G.state==='play'||G.state==='pause'||G.state==='inv')save(true);wantReload=true;setTimeout(()=>w.postMessage('skip'),300);};}
+let installEvt=null;addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;$('bInstall').style.display='block';});
+$('bInstall').onclick=async()=>{if(!installEvt)return;installEvt.prompt();try{await installEvt.userChoice;}catch(e){}installEvt=null;$('bInstall').style.display='none';};
+
 boot();

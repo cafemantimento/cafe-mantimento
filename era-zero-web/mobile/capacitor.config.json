@@ -1,0 +1,7 @@
+{
+  "appId": "com.erazero.game",
+  "appName": "Era Zero",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "android": { "backgroundColor": "#05090d" }
+}

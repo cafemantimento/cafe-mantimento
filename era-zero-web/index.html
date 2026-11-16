@@ -261,6 +261,7 @@ button:disabled{opacity:.4;cursor:default}
         <button id="bAch">Conquistas</button>
         <button id="bProfile">Perfil e conta</button>
         <button id="bSettings">Configurações</button>
+        <button id="bInstall" style="display:none">Instalar o jogo</button>
       </div>
       <div class="acct" id="slotInfo"></div>
       <div class="acct" id="acctLine"></div>
@@ -313,6 +314,7 @@ button:disabled{opacity:.4;cursor:default}
       </div>
     </div>
   </div>
+  <div id="updBar" style="display:none;position:absolute;left:50%;bottom:calc(16px + var(--sb));transform:translateX(-50%);z-index:40" class="panel"><div style="display:flex;gap:12px;align-items:center;padding:10px 14px"><span>Nova versão do Era Zero disponível.</span><button class="primary" id="bUpd">Atualizar agora</button></div></div>
   <div id="rotate">Gire o celular<small>O Era Zero é jogado com a tela deitada.</small></div>
   <div class="screen" id="modes"><div class="panelbox"><h2>MODOS DE JOGO</h2><div id="modeList"></div><div class="mrow" style="margin-top:14px"><button id="bModesBack">Voltar</button></div></div></div>
   <div class="screen" id="settings"><div class="panelbox"><h2>CONFIGURAÇÕES</h2>
@@ -356,6 +358,7 @@ button:disabled{opacity:.4;cursor:default}
 <script src="js/avatar.js"></script>
 <script src="js/net.js"></script>
 <script src="js/cloud.js"></script>
+<script src="firebase-config.js"></script>
 <script src="js/firebase.js"></script>
 <script src="js/main.js"></script>
 

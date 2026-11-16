@@ -1,0 +1,25 @@
+name: Era Zero - publicar no GitHub Pages (manual)
+
+# Só roda quando você manda (aba Actions > este fluxo > Run workflow).
+# Atenção: o GitHub Pages deste repositório passaria a mostrar o jogo no lugar do site atual.
+# O ideal é usar este fluxo num repositório só do jogo.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 era-zero-web/tools/build.py era-zero-web/dist
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: era-zero-web/dist }
+      - id: deploy
+        uses: actions/deploy-pages@v4
