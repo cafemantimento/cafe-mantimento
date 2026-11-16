@@ -41,5 +41,6 @@ holdBtn('tDem',()=>press('KeyX'));
 $('tRun').addEventListener('touchstart',e=>{e.preventDefault();touchRun=!touchRun;$('tRun').classList.toggle('on',touchRun);},{passive:false});
 $('tInv').addEventListener('click',()=>setState('inv'));
 $('tCam').addEventListener('click',()=>toggleView());
+$('tDrink').addEventListener('click',()=>drinkCanteen());
 $('tPause').addEventListener('click',()=>setState('pause'));
 function updateTouchContext(){const d=selDef();$('tEat').style.display=d&&d.kind==='food'?'flex':'none';$('tRot').style.display=build.id&&!isGrid(build.id)?'flex':'none';$('tAtk').textContent=build.id?'CONSTRUIR':'GOLPEAR';}

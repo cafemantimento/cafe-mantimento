@@ -29,7 +29,6 @@ function iconURL(id){if(id in iconCache)return iconCache[id];const rows=ICONS[id
   rows.forEach((row,j)=>{for(let i=0;i<16;i++){const ch=row[i];if(!ch||ch==='.')continue;x.fillStyle=PAL[ch]||'#f0f';x.fillRect(i,j+Math.max(0,off),1,1);}});
   return iconCache[id]=c.toDataURL();}
 
-const ico=d=>{const u=iconURL(d.id);return `<div class="ico">${u?`<img src="${u}" alt="">`:d.short}</div>`;};
 function hexA(hex,a){const c=new THREE.Color(hex);return `rgba(${Math.round(c.r*255*0.75)},${Math.round(c.g*255*0.75)},${Math.round(c.b*255*0.75)},${a+0.35})`;}
 function slotHTML(i,s,withKey){const d=s?ITEMS[s.id]:null;return (withKey?`<span class="k">${i+1}</span>`:'')+(d?ico(d)+(d.max>1?`<span class="n">${s.n}</span>`:''):'');}
 const hot=$('hotbar');for(let i=0;i<8;i++){const el=document.createElement('div');el.className='slot';el.addEventListener('click',()=>selectSlot(i));el.addEventListener('touchstart',e=>{e.preventDefault();selectSlot(i);},{passive:false});hot.appendChild(el);}
@@ -37,8 +36,6 @@ let lastHot='';
 function renderHotbar(){const key=G.sel+'|'+G.inv.slice(0,8).map(s=>s?s.id+s.n:'').join(',');if(key===lastHot)return;lastHot=key;
   [...hot.children].forEach((el,i)=>{el.className='slot'+(i===G.sel?' sel':'');el.innerHTML=slotHTML(i,G.inv[i],true);});
   const d=selDef();$('selname').textContent=d?d.name.toUpperCase():'MÃOS LIVRES';}
-function renderQuests(){$('questTitle').textContent=G.eraDone?'Era I concluída!':'Primeiros Passos';
-  let shown=0;$('questList').innerHTML=QUESTS.map((q,i)=>{const done=G.quest[i]>=q[2];if(isTouch&&(done||shown>=2))return '';shown++;return `<div class="obj${done?' done':''}"><i></i><span>${q[1]}</span>${q[2]>1?`<small>${G.quest[i]}/${q[2]}</small>`:''}</div>`;}).join('');}
 const toasts=[];
 function toast(text,color){const el=document.createElement('div');el.className='panel toast';el.style.borderLeftColor=color||'var(--cyan)';el.style.color=color&&color!=='var(--muted)'?color:'var(--fg)';el.textContent=text;$('toasts').appendChild(el);
   toasts.push({el,until:performance.now()/1000+4.5});if(toasts.length>6){toasts[0].el.remove();toasts.shift();}}
@@ -47,6 +44,7 @@ function toastGather(id,n){const k='g_'+id;const ex=toasts.find(t=>t.key===k);if
 let bannerUntil=0;
 function banner(t,p){const b=$('banner');b.querySelector('h2').textContent=t;const pe=b.querySelector('p');pe.textContent=p||'';pe.style.display=p?'block':'none';b.style.display='block';b.style.opacity=1;bannerUntil=performance.now()/1000+7;}
 const DIRS=['N','NE','L','SE','S','SO','O','NO'];
+function dirTo(x,z){let a=Math.atan2(x-P.x,-(z-P.z))*180/Math.PI;if(a<0)a+=360;return `${DIRS[Math.round(a/45)%8]} ${Math.round(Math.hypot(x-P.x,z-P.z))}m`;}
 const WATER_PTS=[];for(let x=-HALF+30;x<HALF-30;x+=6)for(let z=-HALF+30;z<HALF-30;z+=6)if(H(x,z)<WATER-0.4)WATER_PTS.push([x,z]);
 let waterHint='',waterTick=0;
 function updateWaterHint(){let best=null,bd=1e9;for(const w of WATER_PTS){const d=(w[0]-P.x)**2+(w[1]-P.z)**2;if(d<bd){bd=d;best=w;}}
@@ -54,9 +52,13 @@ function updateWaterHint(){let best=null,bd=1e9;for(const w of WATER_PTS){const 
 function renderHud(){const st=G.stats;
   const bar=(f,v,val)=>{$(f).style.width=clamp(val,0,100)+'%';$(v).textContent=Math.ceil(val);};
   bar('fHp','vHp',st.hp);bar('fFood','vFood',st.food);bar('fWater','vWater',st.water);bar('fStam','vStam',st.stam);
-  const t=st.temp;$('fTemp').style.width=clamp((t+5)/45*100,0,100)+'%';$('fTemp').style.background=t<10?'var(--water)':t>30?'var(--hp)':'var(--amber)';$('vTemp').textContent=Math.round(t)+'°';
-  const th=$('temphint');const msg=t<10?'Você está com frio. Fique perto de uma fogueira ou de um abrigo.':st.nearFire?'Aquecido pela fogueira':st.sheltered?'Protegido no abrigo':'';th.textContent=msg;th.style.display=msg?'block':'none';th.style.color=t<10?'var(--water)':'var(--muted)';
-  let yaw=(-P.yaw*180/Math.PI)%360;if(yaw<0)yaw+=360;waterTick-=1;if(waterTick<=0){waterTick=30;updateWaterHint();}$('compass').textContent=`${DIRS[Math.round(yaw/45)%8]}  ·  ${Math.round(yaw)%360}°`+(waterHint&&G.stats.water<75?`   ·   ${waterHint}`:'');
+  const t=st.temp;$('fps').style.display=SETTINGS.fps?'block':'none';if(SETTINGS.fps)$('fps').textContent=fpsV+' FPS';
+  $('biomeLbl').textContent=(BIOME_INFO[WEATHER.biome]||BIOME_INFO.temperada).name+(P.cave?'':' · '+W_DEF[WEATHER.type].name);
+  $('tDrink').style.display=isTouch&&EFX().canteen?'flex':'none';
+  $('fTemp').style.width=clamp((t+5)/45*100,0,100)+'%';$('fTemp').style.background=t<10?'var(--water)':t>30?'var(--hp)':'var(--amber)';$('vTemp').textContent=Math.round(t)+'°';
+  const th=$('temphint');const msg=t<10?(t<0?'Congelando! Fogueira, abrigo ou um casaco de pele.':'Você está com frio. Fique perto de uma fogueira ou de um abrigo.'):t>34?'Calor forte: a sede aumenta rápido.':st.nearFire?'Aquecido pela fogueira':st.sheltered?'Protegido no abrigo':'';th.textContent=msg;th.style.display=msg?'block':'none';th.style.color=t<10?'var(--water)':'var(--muted)';
+  let yaw=(-P.yaw*180/Math.PI)%360;if(yaw<0)yaw+=360;waterTick-=1;if(waterTick<=0){waterTick=30;updateWaterHint();}let extra='';const tr=treasureAt();if(tr)extra=`   ·   Tesouro: ${dirTo(tr.x,tr.z)}`;else if(EFX().compass&&!P.cave){let bp=null,bd=1e9;for(const p of POIS){if(G.discovered['poi_'+p.id])continue;const d=Math.hypot(p.x-P.x,p.z-P.z);if(d<bd){bd=d;bp=p;}}if(bp)extra=`   ·   ${bp.name}: ${dirTo(bp.x,bp.z)}`;}
+  if(!extra&&waterHint&&G.stats.water<75&&!P.cave)extra=`   ·   ${waterHint}`;$('compass').textContent=`${DIRS[Math.round(yaw/45)%8]}  ·  ${Math.round(yaw)%360}°`+extra;
   const hh=Math.floor(G.hour),mm=Math.floor((G.hour%1)*60);$('clock').innerHTML=`DIA ${G.day} · <em>${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}</em> · ${isNight()?'Noite':'Dia'}`;
   const pe=$('prompt');pe.textContent=prompt;pe.style.display=prompt&&G.state==='play'?'block':'none';
   $('cross').className=hitMarker>0?'hit':'';if(isTouch)$('cross').style.display='block';else{const c=$('cross').style;c.display=hitMarker>0?'block':'none';c.left=MOUSE.px+'px';c.top=MOUSE.py+'px';}
@@ -70,20 +72,3 @@ function renderHud(){const st=G.stats;
   if(bannerUntil){const left=bannerUntil-now;$('banner').style.opacity=clamp(left/1.2,0,1);if(left<=0){$('banner').style.display='none';bannerUntil=0;}}}
 
 // ---------------- inventário e fabricação
-let picked=-1,infoSlot=-1;
-function buildInvGrid(){const mk=(parent,from)=>{parent.innerHTML='';for(let i=from;i<from+(from===0?8:24);i++){const el=document.createElement('div');el.className='slot';el.dataset.i=i;
-  el.addEventListener('click',()=>invClick(i));el.addEventListener('contextmenu',e=>{e.preventDefault();eat(i);});parent.appendChild(el);}};mk($('gHot'),0);mk($('gBag'),8);}
-buildInvGrid();
-function invClick(i){if(picked<0){if(G.inv[i]){picked=i;infoSlot=i;}}else{if(picked!==i)invSwap(picked,i);picked=-1;infoSlot=i;}invDirty=true;refreshHeld();}
-function renderInventory(){document.querySelectorAll('#inv .slot').forEach(el=>{const i=+el.dataset.i;el.className='slot'+(i===picked?' pick':'');el.innerHTML=slotHTML(i,G.inv[i],i<8);});
-  const s=infoSlot>=0?G.inv[infoSlot]:null;const d=s?ITEMS[s.id]:null;const info=$('info');
-  info.innerHTML=d?`<div><b>${d.name}</b><br>${d.desc}</div>`+(d.kind==='food'?`<button class="primary" id="eatBtn">Comer</button>`:''):'<div style="color:var(--muted)">Nenhum item selecionado.</div>';
-  const eb=$('eatBtn');if(eb)eb.onclick=()=>{eat(infoSlot);};
-  $('recList').innerHTML='';
-  for(const [id,cost] of RECIPES){const d2=ITEMS[id];const can=Object.keys(cost).every(k=>invCount(k)>=cost[k]);const row=document.createElement('div');row.className='rec'+(can?' can':'');
-    row.innerHTML=ico(d2)+`<div class="mid"><b style="color:${can?'var(--fg)':'var(--muted)'}">${d2.name}</b><div class="costs">${Object.keys(cost).map(k=>`<span class="${invCount(k)>=cost[k]?'ok':'no'}">${invCount(k)}/${cost[k]} ${ITEMS[k].name}</span>`).join('')}</div></div>`;
-    const b=document.createElement('button');b.textContent='Fabricar';if(can)b.className='primary';b.disabled=!can;b.onclick=()=>craft(id,cost);row.appendChild(b);$('recList').appendChild(row);}
-  invDirty=false;}
-function craft(id,cost){if(!Object.keys(cost).every(k=>invCount(k)>=cost[k]))return;for(const k in cost)invRemove(k,cost[k]);
-  if(invAdd(id,1)>0){for(const k in cost)invAdd(k,cost[k]);toast('Inventário cheio','var(--red)');return;}
-  toast('Fabricado: '+ITEMS[id].name,'var(--cyan)');sfx('craft');if(id==='machado_pedra')questAdvance('machado',1);}

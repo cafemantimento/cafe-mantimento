@@ -11,6 +11,8 @@ function buildHeld(d,forAvatar){const H2=new THREE.Group();
   if(!d){if(!forAvatar)box(H2,0,-0.05,0,0.11,0.11,0.28,MAT.skin);}
   else if(d.tool==='axe'){cyl(H2,0,0.05,0,0.045,0.6,0.045,MAT.wood);box(H2,0.07,0.3,0,0.18,0.12,0.06,MAT.stone);}
   else if(d.tool==='pick'){cyl(H2,0,0.05,0,0.045,0.6,0.045,MAT.wood);box(H2,0,0.32,0,0.36,0.06,0.06,MAT.stone,0,0,0.14);}
+  else if(d.tool==='torch'){cyl(H2,0,0.05,0,0.05,0.55,0.05,MAT.woodDark);const fl=new THREE.Mesh(new THREE.ConeGeometry(0.07,0.2,6),MAT.flame);fl.position.y=0.4;H2.add(fl);const fc=new THREE.Mesh(new THREE.ConeGeometry(0.04,0.13,6),MAT.flameCore);fc.position.y=0.38;H2.add(fc);}
+  else if(d.kind==='equip'||d.kind==='use'){box(H2,0,0,0,0.14,0.04,0.18,mat(new THREE.Color(d.color)),0.5);}
   else if(d.tool==='spear'){cyl(H2,0,0.15,-0.1,0.035,1.2,0.035,MAT.wood,-1.2);box(H2,0,0.36,-0.7,0.05,0.05,0.16,MAT.concreteDark,0.35,0,0.8);}
   else if(d.kind==='piece'){box(H2,0,0,0,0.22,0.02,0.3,new THREE.MeshBasicMaterial({color:lin(0x5fe1ff),transparent:true,opacity:0.7}),0.5);}
   else{const m=mat(new THREE.Color(d.color));(d.kind==='food'?sph:box)(H2,0,0,0,0.13,0.13,0.13,m);}
@@ -25,38 +27,39 @@ function refreshHeld(){const d=selDef();const id=d?d.id:'';if(id===handId)return
 // ======================================================================
 function useStam(a){if(G.stats.stam<a)return false;G.stats.stam-=a;G.stats.stamDelay=0.8;return true;}
 let flash=0;
-function damage(a,silent){const st=G.stats;if(st.dead)return;st.hp-=a;if(!silent){flash=0.45;sfx('hurt');}if(st.hp<=0){st.hp=0;st.dead=true;setState('dead');}}
+function damage(a,silent){const st=G.stats;if(st.dead||G.mode==='construcao')return;st.hp-=a;if(!silent){flash=0.45;sfx('hurt');}if(st.hp<=0){st.hp=0;st.dead=true;setState('dead');}}
 const isNight=()=>G.hour<6||G.hour>=19;
 let ambientTemp=20,shelterCheck=0;
 function updateStats(dt){const st=G.stats;if(st.dead)return;
-  st.nearFire=campfires().some(p=>Math.hypot(p.g.position.x-P.x,p.g.position.z-P.z)<7);
+  st.nearFire=campfires().concat(forges()).some(p=>Math.hypot(p.g.position.x-P.x,p.g.position.z-P.z)<7);
   shelterCheck-=dt;if(shelterCheck<=0){shelterCheck=0.5;st.sheltered=boxColliders.some(b=>b.piece&&P.x>b.minx&&P.x<b.maxx&&P.z>b.minz&&P.z<b.maxz&&b.miny>P.y+1.5&&b.miny<P.y+6);}
-  st.temp=ambientTemp+(st.nearFire?15:0)+(st.sheltered?6:0);const cold=st.temp<10;
-  st.food=Math.max(0,st.food-(cold?0.11:0.07)*dt);st.water=Math.max(0,st.water-0.1*dt);
+  const E=EFX(),mode=MODES[G.mode]||MODES.sobrevivencia;const warm=Math.min(E.warm,Math.max(0,22-ambientTemp));
+  st.temp=ambientTemp+(st.nearFire?15:0)+(st.sheltered?6:0)+warm;const cold=st.temp<10,hot=st.temp>34;
+  const k=mode.drain*E.drain;st.food=Math.max(0,st.food-(cold?0.11:0.07)*dt*k);st.water=Math.max(0,st.water-0.1*dt*k*E.thirst*(hot?1.8:1));
   if(st.stamDelay>0)st.stamDelay-=dt;else st.stam=Math.min(100,st.stam+(cold?7:14)*dt);
-  let drain=0;if(st.food<=0)drain+=1;if(st.water<=0)drain+=1.2;if(cold)drain+=0.35;
+  let drain=0;if(st.food<=0)drain+=1;if(st.water<=0)drain+=1.2;if(cold)drain+=st.temp<0?0.8:0.35;if(hot&&st.water<20)drain+=0.3;drain*=mode.harm;
   if(drain>0)damage(drain*dt,true);else if(st.food>40&&st.water>40&&st.hp<100)st.hp=Math.min(100,st.hp+0.6*dt);}
 
 // ======================================================================
 //  Movimento e colisão
 // ======================================================================
 const PR=0.35;
-function groundAt(x,y,z){let g=H(x,z);for(const b of boxColliders){if(x>b.minx-0.05&&x<b.maxx+0.05&&z>b.minz-0.05&&z<b.maxz+0.05&&b.maxy<=y+0.5&&b.maxy>g)g=b.maxy;}return g;}
+function groundAt(x,y,z){let g=P.cave?caveGround(x,z):H(x,z);for(const b of boxColliders){if(x>b.minx-0.05&&x<b.maxx+0.05&&z>b.minz-0.05&&z<b.maxz+0.05&&b.maxy<=y+0.5&&b.maxy>g)g=b.maxy;}return g;}
 function collide(nx,nz,y){
-  for(const n of nodes){if(!n.alive||n.r===0)continue;const dx=nx-n.x,dz=nz-n.z,rr=n.r+PR;const d2=dx*dx+dz*dz;if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=n.x+dx/d*rr;nz=n.z+dz/d*rr;}}
+  nodesNear(nx,nz,6,n=>{if(!n.alive||n.r===0||Math.abs(n.y-y)>6)return;const dx=nx-n.x,dz=nz-n.z,rr=n.r+PR;const d2=dx*dx+dz*dz;if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=n.x+dx/d*rr;nz=n.z+dz/d*rr;}});
   for(const b of boxColliders){if(b.maxy<=y+0.5||b.miny>=y+1.75)continue;const cx=clamp(nx,b.minx,b.maxx),cz=clamp(nz,b.minz,b.maxz);let dx=nx-cx,dz=nz-cz;const d2=dx*dx+dz*dz;
     if(d2<PR*PR){if(d2>1e-8){const d=Math.sqrt(d2);nx=cx+dx/d*PR;nz=cz+dz/d*PR;}else{const l=nx-b.minx,r=b.maxx-nx,f=nz-b.minz,k=b.maxz-nz;const m=Math.min(l,r,f,k);if(m===l)nx=b.minx-PR;else if(m===r)nx=b.maxx+PR;else if(m===f)nz=b.minz-PR;else nz=b.maxz+PR;}}}
-  for(const c of creatures){if(c.state==='dead')continue;const p=c.g.position;const dx=nx-p.x,dz=nz-p.z,rr=0.7+PR;const d2=dx*dx+dz*dz;if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=p.x+dx/d*rr;nz=p.z+dz/d*rr;}}
+  for(const c of creatures){if(c.state==='dead'||c.sp.habitat!=='land'||c.sp.hp<30)continue;const p=c.g.position;const dx=nx-p.x,dz=nz-p.z,rr=(c.sp.h?c.sp.h*0.35:c.sp.p&&c.sp.p.len?c.sp.p.len*0.3:0.4)+PR;const d2=dx*dx+dz*dz;if(d2<rr*rr&&d2>1e-6){const d=Math.sqrt(d2);nx=p.x+dx/d*rr;nz=p.z+dz/d*rr;}}
   return [nx,nz];}
 function updatePlayer(dt){const control=G.state==='play'&&!G.stats.dead;
-  if(control){const sens=isTouch?0.0042:0.0042;P.yaw-=lookDX*sens;P.pitch=clamp(P.pitch-lookDY*sens,-1.45,1.45);
+  if(control){const sens=0.0042*SETTINGS.sens;P.yaw-=lookDX*sens;P.pitch=clamp(P.pitch-lookDY*sens,-1.45,1.45);
     if(!isTouch){let ty=0,tp=0;if(keys.ArrowLeft)ty+=1;if(keys.ArrowRight)ty-=1;if(keys.ArrowUp)tp+=1;if(keys.ArrowDown)tp-=1;
       if(MOUSE.in&&!MOUSE.rdrag){const ex=Math.abs(MOUSE.x),ey=Math.abs(MOUSE.y);if(ex>0.84)ty-=Math.sign(MOUSE.x)*Math.min(1,(ex-0.84)/0.13);if(ey>0.86)tp+=Math.sign(MOUSE.y)*Math.min(1,(ey-0.86)/0.12)*0.6;}
       P.yaw+=ty*2.6*dt;P.pitch=clamp(P.pitch+tp*1.6*dt,-1.45,1.45);}}
   lookDX=0;lookDY=0;
   let ix=0,iz=0;if(control){ix=(keys.KeyD?1:0)-(keys.KeyA?1:0);iz=(keys.KeyW?1:0)-(keys.KeyS?1:0);if(joy.id!==null){ix=joy.x;iz=-joy.y;}const l=Math.hypot(ix,iz);if(l>1){ix/=l;iz/=l;}}
-  const st=G.stats;P.sprint=control&&(keys.ShiftLeft||keys.ShiftRight||touchRun)&&iz>0.1&&st.stam>1;if(P.sprint){st.stam-=14*dt;st.stamDelay=0.8;}
-  let speed=P.sprint?7.5:4.5;if(st.food<=0||st.water<=0)speed*=0.8;
+  const st=G.stats,E=EFX();P.sprint=control&&(keys.ShiftLeft||keys.ShiftRight||touchRun)&&iz>0.1&&st.stam>1;if(P.sprint){st.stam-=14*dt*E.sprint*(G.mode==='construcao'?0:1);st.stamDelay=0.8;}
+  let speed=(P.sprint?7.5:4.5)*E.speed;if(P.cave)speed*=0.85;if(st.food<=0||st.water<=0)speed*=0.8;
   const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),rx=Math.cos(P.yaw),rz=-Math.sin(P.yaw);
   const tx=(rx*ix+fx*iz)*speed,tz=(rz*ix+fz*iz)*speed;const acc=(P.grounded?14:3)*speed*dt;
   const dvx=tx-P.vx,dvz=tz-P.vz,dl=Math.hypot(dvx,dvz);if(dl<=acc){P.vx=tx;P.vz=tz;}else{P.vx+=dvx/dl*acc;P.vz+=dvz/dl*acc;}
@@ -64,11 +67,11 @@ function updatePlayer(dt){const control=G.state==='play'&&!G.stats.dead;
   P.vy-=20*dt;
   let nx=P.x+P.vx*dt,nz=P.z+P.vz*dt;
   // não entrar na água funda
-  if(H(nx,nz)<WATER-1.1&&H(nx,nz)<H(P.x,P.z)){nx=P.x;nz=P.z;}
+  if(!P.cave&&H(nx,nz)<WATER-1.1&&H(nx,nz)<H(P.x,P.z)){nx=P.x;nz=P.z;}
   [nx,nz]=collide(nx,nz,P.y);
-  nx=clamp(nx,-HALF+20,HALF-20);nz=clamp(nz,-HALF+20,HALF-20);
+  if(P.cave){const c=P.cave,ddx=nx-c.x,ddz=nz-c.z,dd=Math.hypot(ddx,ddz);if(dd>38){nx=c.x+ddx/dd*38;nz=c.z+ddz/dd*38;}}else{nx=clamp(nx,-HALF+20,HALF-20);nz=clamp(nz,-HALF+20,HALF-20);}
   // não subir encostas íngremes demais
-  const gNew=groundAt(nx,P.y,nz);if(gNew>P.y+0.5&&slope(nx,nz)>48){nx=P.x;nz=P.z;}
+  const gNew=groundAt(nx,P.y,nz);if(!P.cave&&gNew>P.y+0.5&&slope(nx,nz)>48){nx=P.x;nz=P.z;}
   P.x=nx;P.z=nz;
   let ny=P.y+P.vy*dt;const g=groundAt(P.x,P.y,P.z);
   for(const b of boxColliders){if(P.x>b.minx&&P.x<b.maxx&&P.z>b.minz&&P.z<b.maxz&&P.y+1.8<=b.miny+0.05&&ny+1.8>b.miny){ny=b.miny-1.8;P.vy=Math.min(P.vy,0);}}
@@ -82,7 +85,7 @@ function updatePlayer(dt){const control=G.state==='play'&&!G.stats.dead;
   // passos e balanço da câmera
   const moving=control&&(Math.abs(ix)+Math.abs(iz))>0.05&&P.grounded;const prevB=bob;
   bob=moving?bob+dt*(P.sprint?11.5:7.5):lerp(bob,Math.round(bob/Math.PI)*Math.PI,Math.min(1,dt*6));
-  if(moving&&Math.floor(bob/Math.PI)!==Math.floor(prevB/Math.PI))sfx('step',{wood:P.y>H(P.x,P.z)+0.12});
+  if(moving&&Math.floor(bob/Math.PI)!==Math.floor(prevB/Math.PI))sfx('step',{wood:!P.cave&&P.y>H(P.x,P.z)+0.12,surf:WEATHER.biome});
   const amp=moving?(P.sprint?0.075:0.045):0;P.bobAmp=lerp(P.bobAmp||0,amp,Math.min(1,dt*8));
   const by=Math.abs(Math.sin(bob))*P.bobAmp-P.land,roll=Math.sin(bob)*P.bobAmp*0.12;
   P.speedNow=Math.hypot(P.vx,P.vz);
@@ -90,7 +93,7 @@ function updatePlayer(dt){const control=G.state==='play'&&!G.stats.dead;
   if(VIEW.tp){
     const head=new THREE.Vector3(P.x,P.y+1.62,P.z);const fwd=new THREE.Vector3(-Math.sin(P.yaw)*Math.cos(P.pitch),Math.sin(P.pitch),-Math.cos(P.yaw)*Math.cos(P.pitch));
     const right=new THREE.Vector3(Math.cos(P.yaw),0,-Math.sin(P.yaw));let dist=3.4;
-    for(let t=0.4;t<=3.4;t+=0.2){const q=head.clone().addScaledVector(fwd,-t).addScaledVector(right,0.45*(t/3.4));if(q.y<H(q.x,q.z)+0.25){dist=Math.max(0.6,t-0.3);break;}}
+    for(let t=0.4;t<=3.4;t+=0.2){const q=head.clone().addScaledVector(fwd,-t).addScaledVector(right,0.45*(t/3.4));if(q.y<(P.cave?caveGround(q.x,q.z):H(q.x,q.z))+0.25){dist=Math.max(0.6,t-0.3);break;}}
     camera.position.copy(head).addScaledVector(fwd,-dist).addScaledVector(right,0.45*(dist/3.4));camera.position.y+=0.15;
     camera.rotation.set(P.pitch,P.yaw,0);hand.visible=false;
     if(localAv){localAv.g.visible=true;localAv.g.position.set(P.x,P.y,P.z);localAv.g.rotation.y=P.yaw;animateAvatar(localAv,P.speedNow,dt);}

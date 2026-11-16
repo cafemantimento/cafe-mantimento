@@ -22,7 +22,7 @@ function fbm(x,y,o){let s=0,a=.5,f=1,n=0;for(let i=0;i<o;i++){s+=noise(x*f,y*f)*
 //  Itens, receitas e missões
 // ======================================================================
 const ITEMS={};
-function item(id,name,short,color,kind,extra){ITEMS[id]=Object.assign({id,name,short,color,kind,max:100,tool:null,dmg:6},extra||{});}
+function item(id,name,short,color,kind,extra){ITEMS[id]=Object.assign({id,name,short,color,kind,max:100,tool:null,dmg:6,rarity:0},extra||{});}
 item('madeira','Madeira','MAD','#9e6e3d','res',{desc:'Corte árvores para conseguir. Um machado rende mais.'});
 item('pedra','Pedra','PED','#9ea3a8','res',{desc:'Quebre rochas para conseguir. Uma picareta rende mais.'});
 item('fibra','Fibra','FIB','#8cb852','res',{desc:'Colete em arbustos. Serve para amarrar ferramentas e construções.'});
@@ -42,6 +42,7 @@ item('teto','Teto de Madeira','TET','#5fe1ff','piece',{max:20,desc:'Cobre uma fu
 item('fogueira','Fogueira','FOG','#5fe1ff','piece',{max:20,desc:'Aquece, ilumina a noite e assa carne.'});
 item('saco','Saco de Dormir','SAC','#5fe1ff','piece',{max:20,desc:'Define onde você renasce. À noite, permite dormir até o amanhecer.'});
 const RECIPES=[
+  ['tocha',{madeira:3,fibra:2}],['casaco_pele',{couro:6,fibra:4}],['botas_couro',{couro:4,fibra:2}],['cantil_couro',{couro:3,fibra:2}],
   ['machado_pedra',{madeira:4,pedra:3,fibra:4}],
   ['picareta_pedra',{madeira:4,pedra:4,fibra:4,silex:1}],
   ['lanca',{madeira:6,silex:2,fibra:6}],
@@ -51,6 +52,12 @@ const RECIPES=[
   ['porta',{madeira:8,fibra:3}],
   ['teto',{madeira:8,fibra:3}],
   ['saco',{fibra:15,couro:3}],
+  ['forja',{pedra:20,madeira:10,silex:4},2],['bau',{madeira:20,lingote_cobre:2},2],['machado_ferro',{madeira:4,lingote_ferro:3,couro:1},2],
+  ['picareta_ferro',{madeira:4,lingote_ferro:3,lingote_cobre:1},2],['lampiao',{lingote_cobre:2,fibra:2,cristal:1},2],['amuleto_colheita',{fragmento_meteoro:3,lingote_ferro:2},2],
+];
+const QUESTS2=[
+  ['forja','Construa uma Forja',1],['cobre','Minere minério de cobre',8],['ferro','Minere minério de ferro',8],['lingote','Funda lingotes na forja',6],
+  ['ferramenta','Fabrique uma ferramenta de ferro',1],['bau','Construa um Baú',1],['caverna','Explore uma caverna subterrânea',1],['biomas','Descubra 4 biomas',4],
 ];
 const QUESTS=[
   ['madeira','Colete madeira',15],['pedra','Colete pedra',10],['machado','Fabrique um Machado de Pedra',1],
@@ -62,9 +69,10 @@ const QUESTS=[
 //  Estado do jogo
 // ======================================================================
 const G={
-  state:'loading', inv:new Array(32).fill(null), sel:0,
+  state:'loading', inv:new Array(40).fill(null), sel:0,
   stats:{hp:100,food:100,water:100,stam:100,temp:20,nearFire:false,sheltered:false,dead:false},
-  hour:8, day:1, dayLen:1200, quest:QUESTS.map(q=>0), eraDone:false, respawn:null,
+  hour:8, day:1, dayLen:1200, quest:QUESTS.map(q=>0), quest2:QUESTS2.map(q=>0), era:1, eraDone:false, era2Done:false, respawn:null,
+  mode:'sobrevivencia', equip:{mochila:null,botas:null,amuleto:null,acessorio:null,roupa:null}, opened:{}, discovered:{}, secrets:{}, water:0, kills:0, seenSpecies:{}, treasure:null,
 };
 
 // ---------------- inventário
@@ -72,9 +80,9 @@ function invCount(id){let n=0;for(const s of G.inv)if(s&&s.id===id)n+=s.n;return
 function invAdd(id,n){const d=ITEMS[id];let left=n;
   for(const s of G.inv){if(left<=0)break;if(s&&s.id===id&&s.n<d.max){const a=Math.min(left,d.max-s.n);s.n+=a;left-=a;}}
   const hotFirst=d.kind!=='res';
-  for(let k=0;k<32&&left>0;k++){const i=hotFirst?k:(k+8)%32;if(G.inv[i])continue;const a=Math.min(left,d.max);G.inv[i]={id,n:a};left-=a;}
+  const cap=invCap();for(let k=0;k<cap&&left>0;k++){const i=hotFirst?k:(k+8)%cap;if(G.inv[i])continue;const a=Math.min(left,d.max);G.inv[i]={id,n:a};left-=a;}
   if(left!==n)invChanged();return left;}
-function invRemove(id,n){if(invCount(id)<n)return false;let left=n;for(let i=31;i>=0&&left>0;i--){const s=G.inv[i];if(!s||s.id!==id)continue;const t=Math.min(left,s.n);s.n-=t;left-=t;if(s.n<=0)G.inv[i]=null;}invChanged();return true;}
+function invRemove(id,n){if(invCount(id)<n)return false;let left=n;for(let i=G.inv.length-1;i>=0&&left>0;i--){const s=G.inv[i];if(!s||s.id!==id)continue;const t=Math.min(left,s.n);s.n-=t;left-=t;if(s.n<=0)G.inv[i]=null;}invChanged();return true;}
 function invRemoveSlot(i,n){const s=G.inv[i];if(!s)return;s.n-=n;if(s.n<=0)G.inv[i]=null;invChanged();}
 function invSwap(a,b){if(a===b)return;const A=G.inv[a],B=G.inv[b];
   if(A&&B&&A.id===B.id){const m=ITEMS[A.id].max;const mv=Math.min(A.n,m-B.n);B.n+=mv;A.n-=mv;if(A.n<=0)G.inv[a]=null;}else{G.inv[a]=B;G.inv[b]=A;}invChanged();}
@@ -83,10 +91,17 @@ function invChanged(){invDirty=true;refreshHeld();}
 function give(id,n){const left=invAdd(id,n);const got=n-left;if(got>0){toastGather(id,got);onGathered(id,got);}if(left>0)toast('Inventário cheio','var(--red)');return got;}
 const selDef=()=>G.inv[G.sel]?ITEMS[G.inv[G.sel].id]:null;
 
-// ---------------- missões
-function questAdvance(id,n){const i=QUESTS.findIndex(q=>q[0]===id);if(i<0)return;const t=QUESTS[i][2];if(G.quest[i]>=t)return;
-  G.quest[i]=Math.min(t,G.quest[i]+n);if(G.quest[i]>=t){toast('Objetivo concluído: '+QUESTS[i][1],'var(--green)');sfx('done');}
+// ---------------- missões (as eras são etapas no mesmo mundo)
+const curQ=()=>G.era>=2?QUESTS2:QUESTS,curP=()=>G.era>=2?G.quest2:G.quest;
+function questAdvance(id,n){const Q=curQ(),Pg=curP();const i=Q.findIndex(q=>q[0]===id);if(i<0)return;const t=Q[i][2];if(Pg[i]>=t)return;
+  Pg[i]=Math.min(t,Pg[i]+n);if(Pg[i]>=t){toast('Objetivo concluído: '+Q[i][1],'var(--green)');sfx('done');}
   renderQuests();
-  if(!G.eraDone&&QUESTS.every((q,k)=>G.quest[k]>=q[2])){G.eraDone=true;banner('ERA I CONCLUÍDA','Você domina o fogo, a pedra e a madeira. A Era Industrial chega na próxima atualização.');renderQuests();}}
-function onGathered(id,n){if(id==='madeira')questAdvance('madeira',n);if(id==='pedra')questAdvance('pedra',n);}
-function questProgress(){let s=0;QUESTS.forEach((q,i)=>s+=Math.min(1,G.quest[i]/q[2]));return s/QUESTS.length;}
+  if(G.era===1&&!G.eraDone&&QUESTS.every((q,k)=>G.quest[k]>=q[2])){G.eraDone=true;G.era=2;
+    banner('ERA II: INDUSTRIAL','O Vale continua o mesmo, mas agora você sabe trabalhar o metal. Construa uma forja e procure cobre e ferro nas montanhas, no deserto e nas cavernas.');
+    unlockAch('era1');syncEra2();renderQuests();}
+  else if(G.era===2&&!G.era2Done&&QUESTS2.every((q,k)=>G.quest2[k]>=q[2])){G.era2Done=true;banner('ERA II CONCLUÍDA','Metal, ferramentas e exploração. A Era Elétrica é a próxima atualização.');unlockAch('era2');renderQuests();}}
+// objetivos da Era II que já podem estar cumpridos quando a era começa
+function syncEra2(){const d=Object.keys(G.discovered).filter(k=>k!=='caverna').length;if(d)questAdvance('biomas',d);if(G.discovered.caverna)questAdvance('caverna',1);}
+function onGathered(id,n){if(id==='madeira')questAdvance('madeira',n);if(id==='pedra')questAdvance('pedra',n);if(id==='minerio_cobre')questAdvance('cobre',n);if(id==='minerio_ferro')questAdvance('ferro',n);
+  const d=ITEMS[id];if(d&&d.rarity>=3)unlockAch('raro');if(d&&d.rarity>=4)unlockAch('lendario');}
+function questProgress(){const Q=curQ(),Pg=curP();let s=0;Q.forEach((q,i)=>s+=Math.min(1,Pg[i]/q[2]));return s/Q.length;}

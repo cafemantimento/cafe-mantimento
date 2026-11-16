@@ -19,21 +19,25 @@ function pieceVisual(id,ghost){const g=new THREE.Group();const parts=[];
     cyl(g,0,0.12,0,0.1,0.76,0.1,ghost?ghostOk:MAT.woodDark,Math.PI/2,0.5,0);cyl(g,0,0.15,0,0.1,0.76,0.1,ghost?ghostOk:MAT.woodDark,Math.PI/2,-0.7,0);
     if(!ghost){const fl=[];for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.ConeGeometry(0.18-i*0.02,0.6-i*0.08,6),i===0?MAT.flameCore:MAT.flame);c.position.set((i-1.5)*0.08,0.45,(i%2)*0.08-0.04);g.add(c);fl.push(c);}g.userData.flames=fl;}}
   else if(id==='saco'){B(0,0.08,0,0.9,0.16,2,MAT.cloth);B(0,0.17,0.75,0.6,0.12,0.35,MAT.crate);B(0,0.17,-0.2,0.92,0.04,1.2,MAT.woodDark);}
+  else if(id==='forja'){B(0,0.55,0,1.6,1.1,1.3,MAT.stone,true);B(0,1.3,0,1.1,0.5,0.9,MAT.concreteDark);B(0.45,2.0,0.2,0.35,1.4,0.35,MAT.stone);B(0,0.55,0.66,0.6,0.4,0.05,ghost?ghostOk:new THREE.MeshBasicMaterial({color:lin(0xff7a2a)}));
+    if(!ghost)g.userData.forge=true;}
+  else if(id==='bau'){B(0,0.32,0,1.1,0.64,0.7,MAT.crate,true);B(0,0.7,0,1.14,0.14,0.74,MAT.woodDark);B(0,0.45,0.36,0.16,0.2,0.04,MAT.metal);}
   if(ghost)g.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;}});
   return {g,parts};}
 function placePiece(id,pos,rotY,cell,edge,floorTop,silent){const {g,parts}=pieceVisual(id,false);g.position.copy(pos);g.rotation.y=rotY;buildGroup.add(g);g.updateMatrixWorld(true);
-  const p={id,g,cell,edge,floorTop,boxes:[],raw:0,cooked:0,timer:0};g.userData.piece=p;g.traverse(o=>o.userData.piece=p);
+  const p={id,g,cell,edge,floorTop,boxes:[],raw:0,cooked:0,timer:0,ore:{cobre:0,ferro:0},ingots:{cobre:0,ferro:0},store:id==='bau'?new Array(16).fill(null):null};g.userData.piece=p;g.traverse(o=>o.userData.piece=p);
   const swap=Math.abs(Math.sin(rotY))>0.5;
   for(const [x,y,z,sx,sy,sz] of parts){const wx=swap?z:x,wz=swap?x:z,ex=swap?sz:sx,ez=swap?sx:sz;
     p.boxes.push({minx:pos.x+wx-ex/2,maxx:pos.x+wx+ex/2,minz:pos.z+wz-ez/2,maxz:pos.z+wz+ez/2,miny:pos.y+y-sy/2,maxy:pos.y+y+sy/2,piece:p});}
   for(const b of p.boxes)boxColliders.push(b);
   if(isFound(id))foundations.set(ck(cell[0],cell[1]),floorTop);else if(isWall(id))walls.add(edge);else if(isRoof(id))roofs.add(ck(cell[0],cell[1]));
-  pieces.push(p);if(!silent){questShelter();sfx('place');NET.buildDirty=true;}return p;}
+  pieces.push(p);if(!silent){questShelter();sfx('place');NET.buildDirty=true;if(id==='forja')questAdvance('forja',1);if(id==='bau')questAdvance('bau',1);PROFILE.built=(PROFILE.built||0)+1;}return p;}
 function removePiece(p){buildGroup.remove(p.g);for(const b of p.boxes){const i=boxColliders.indexOf(b);if(i>=0)boxColliders.splice(i,1);}
   if(isFound(p.id))foundations.delete(ck(p.cell[0],p.cell[1]));else if(isWall(p.id))walls.delete(p.edge);else if(isRoof(p.id))roofs.delete(ck(p.cell[0],p.cell[1]));
   pieces.splice(pieces.indexOf(p),1);}
 function clearPieces(){while(pieces.length)removePiece(pieces[0]);}
-function questShelter(){const s=Math.min(1,foundations.size)+Math.min(4,walls.size)+Math.min(1,roofs.size);const i=QUESTS.findIndex(q=>q[0]==='abrigo');if(s>G.quest[i])questAdvance('abrigo',s-G.quest[i]);}
+function questShelter(){const s=Math.min(1,foundations.size)+Math.min(4,walls.size)+Math.min(1,roofs.size);const i=QUESTS.findIndex(q=>q[0]==='abrigo');if(G.era===1&&s>G.quest[i])questAdvance('abrigo',s-G.quest[i]);if(s>=6)unlockAch('abrigo');}
+function forges(){return pieces.filter(p=>p.id==='forja');}
 function campfires(){return pieces.filter(p=>p.id==='fogueira').concat(remotePieces().filter(p=>p.id==='fogueira'));}
 function topAt(c){const k=ck(c[0],c[1]);return foundations.has(k)?foundations.get(k):RF.get(k);}
 

@@ -85,9 +85,12 @@ kbd{font-family:var(--display);font-weight:700;font-size:13px;padding:2px 7px;bo
 /* telas */
 .screen{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,5,9,.6);padding:calc(16px + var(--st)) calc(16px + var(--sr)) calc(16px + var(--sb)) calc(16px + var(--sl));overflow:auto}
 .screen.on{display:flex}
+.screen>.menubox{margin:auto}
+@media (max-height:520px){.menubox>p,.menubox>.eyebrow{display:none}.menubox h1{font-size:44px}}
+@media (max-height:760px){.btns{gap:7px}.btns button{padding:8px 18px;font-size:16px}.namebox{margin-bottom:8px}.help,.mpnote{display:none}}
 .menubox{width:min(540px,100%);text-align:center;display:flex;flex-direction:column;align-items:center}
-.menubox h1{font-family:var(--display);font-size:clamp(54px,12vw,96px);letter-spacing:10px;margin:0;line-height:1}
-.menubox p{color:var(--muted);font-size:16.5px;line-height:1.5;margin:10px 0 24px}
+.menubox h1{font-family:var(--display);font-size:clamp(40px,min(11vw,10vh),92px);letter-spacing:8px;margin:0;line-height:1;white-space:nowrap}
+.menubox p{color:var(--muted);font-size:16px;line-height:1.5;margin:8px 0 16px}
 .btns{display:flex;flex-direction:column;gap:10px;width:min(320px,100%)}
 button{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:.5px;padding:11px 22px;border-radius:5px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--fg);cursor:pointer}
 button:hover{background:rgba(255,255,255,.13)}
@@ -151,6 +154,32 @@ button:disabled{opacity:.4;cursor:default}
 .namebox input:focus{outline:2px solid var(--cyan)}
 .mpnote{font-size:13px;color:var(--muted);margin-top:14px;line-height:1.5;max-width:460px}
 #tCam{width:auto;height:36px;border-radius:6px;padding:0 12px;top:calc(var(--st) + 60px);right:calc(200px + var(--sr));font-size:13px}
+#biomeLbl{position:absolute;left:50%;top:calc(58px + var(--st));transform:translateX(-50%) scale(var(--ui));transform-origin:top center;font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:1px;color:var(--fg);text-shadow:0 2px 6px #000;white-space:nowrap}
+#fps{position:absolute;left:50%;bottom:calc(150px + var(--sb));transform:translateX(-50%);font-family:var(--display);font-size:13px;color:var(--muted);display:none}
+.ico.r2{box-shadow:0 0 6px rgba(77,166,255,.5)}.ico.r3{box-shadow:0 0 8px rgba(178,107,255,.6)}.ico.r4{box-shadow:0 0 10px rgba(255,181,71,.7)}.ico.r5{box-shadow:0 0 12px rgba(255,95,162,.8);animation:glow 2s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 18px rgba(255,95,162,1)}}
+.slot.locked{opacity:.35}.slot.eq{width:58px;height:58px}.eqlbl{font-size:10.5px;color:var(--muted);text-align:center;font-family:var(--display);font-weight:600}
+#gEquip{display:flex;gap:6px;flex-wrap:wrap}#gStore{display:grid;grid-template-columns:repeat(8,64px);gap:6px}
+.rar{display:inline-block;font-size:11px;font-family:var(--display);font-weight:700;border:1px solid var(--line);border-radius:4px;padding:0 6px;margin-left:4px;color:var(--muted)}
+#effects{font-size:12.5px;color:var(--muted);margin-top:6px}
+.rec.lock{opacity:.55}
+.screen .panelbox{background:var(--panel-solid);border:1px solid var(--line);border-radius:10px;padding:22px 24px;width:min(920px,100%);max-height:100%;overflow:auto}
+.panelbox h2{font-family:var(--display);font-size:30px;letter-spacing:3px;margin:0 0 14px}
+#modeList{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.modecard{border:1px solid var(--line);border-radius:8px;padding:14px;background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:6px}
+.modecard b{font-family:var(--display);font-size:20px}.modecard p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.45;flex:1}.modecard small{font-size:12px;color:var(--cyan)}
+.mrow{display:flex;gap:8px;flex-wrap:wrap}.mrow button{font-size:15px;padding:8px 14px}
+.setrow{display:flex;align-items:center;gap:12px;margin:10px 0;flex-wrap:wrap}.setrow label{width:150px;font-family:var(--display);font-weight:600}.setrow input[type=range]{flex:1;min-width:140px}
+#qualBtns{display:flex;gap:8px;flex-wrap:wrap}#qualBtns button{font-size:15px;padding:8px 14px}
+#profStats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:12px 0}#profStats div{border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:flex;justify-content:space-between;gap:8px}#profStats b{font-family:var(--display);font-size:18px;color:var(--cyan)}
+#profSpecies{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#profSpecies span{font-size:12px;border:1px solid var(--line);border-radius:4px;padding:2px 6px;color:var(--muted)}#profSpecies span.seen{color:var(--green);border-color:var(--green)}
+#achList{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}.ach{border:1px solid var(--line);border-radius:8px;padding:10px 12px;opacity:.6}.ach.got{opacity:1;border-color:var(--amber)}.ach b{font-family:var(--display);font-size:17px}.ach p{margin:4px 0;font-size:13px;color:var(--muted)}.ach small{font-size:12px}
+.acct{font-size:13px;color:var(--muted);margin-top:12px}
+.form{display:flex;flex-direction:column;gap:8px;max-width:360px}.form input{font-size:16px;padding:9px 11px;border-radius:5px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--fg);-webkit-user-select:text;user-select:text}
+#loadWrap{width:min(420px,80vw);display:flex;flex-direction:column;gap:12px;align-items:center}#loadTrack{width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}#loadBar{height:100%;width:0;background:var(--cyan);transition:width .3s}
+#loading h1{font-family:var(--display);font-size:56px;letter-spacing:8px;margin:0;color:var(--fg)}#loadLbl{font-size:14px;letter-spacing:1px;font-family:var(--body);color:var(--muted)}
+.eradots div.done{color:var(--cyan)}.eradots div.done::before{border-color:var(--cyan);background:rgba(95,225,255,.35)}
+#tDrink{width:54px;height:54px;right:calc(196px + var(--sr));bottom:calc(194px + var(--sb));font-size:12px;display:none}
 @media (prefers-reduced-motion:reduce){ .fill{transition:none} #banner,.toast{transition:none} }
 </style>
 
@@ -176,6 +205,7 @@ button:disabled{opacity:.4;cursor:default}
       </div>
     </div>
     <div class="corner tc panel" id="compass">N</div>
+    <div id="biomeLbl"></div><div id="fps"></div>
     <div class="corner tr" id="rightcol">
       <div class="panel" id="clock">DIA 1 · <em>08:00</em></div>
       <div class="panel" id="online"><i></i><span id="onlineTxt"></span></div>
@@ -194,11 +224,12 @@ button:disabled{opacity:.4;cursor:default}
     <div class="corner br" id="keys">
       <div class="key">Inventário e fabricação <kbd>Tab</kbd></div>
       <div class="key">Pegar / usar <kbd>E</kbd></div>
-      <div class="key">Comer item da mão <kbd>F</kbd></div>
+      <div class="key">Comer / usar item da mão <kbd>F</kbd></div>
       <div class="key">Girar a câmera <kbd>Botão dir. + arrastar</kbd></div>
       <div class="key">Desmontar construção <kbd>X</kbd></div>
       <div class="key">Correr <kbd>Shift</kbd></div>
       <div class="key">Câmera 1ª / 3ª pessoa <kbd>V</kbd></div>
+      <div class="key">Beber do cantil <kbd>G</kbd></div>
       <div class="key">Pausa <kbd>Esc</kbd></div>
     </div>
     <div id="banner"><h2></h2><p></p></div>
@@ -213,20 +244,26 @@ button:disabled{opacity:.4;cursor:default}
       <button class="tb" id="tDem">DES&shy;MONTAR</button>
       <button class="tb" id="tInv">Inventário</button>
       <button class="tb" id="tCam">Câmera</button>
+      <button class="tb" id="tDrink">BEBER</button>
       <button class="tb" id="tPause">Pausa</button>
     </div>
   </div>
 
   <div class="screen" id="menu">
     <div class="menubox">
-      <div class="eyebrow" style="color:var(--cyan)">Protótipo · Era I</div>
+      <div class="eyebrow" style="color:var(--cyan)">Sobrevivência · 8 biomas · Eras I e II</div>
       <h1>ERA ZERO</h1>
       <p>Vinte anos depois do Apagão, você acorda sozinho no Vale. Sobreviva, construa e reacenda a civilização.</p>
       <label class="namebox"><span class="eyebrow">Seu nome no jogo</span><input id="nameIn" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Jogador"></label>
       <div class="btns">
         <button class="primary" id="bContinue">Continuar</button>
-        <button id="bNew">Novo jogo</button>
+        <button id="bNew">Jogar · escolher modo</button>
+        <button id="bAch">Conquistas</button>
+        <button id="bProfile">Perfil e conta</button>
+        <button id="bSettings">Configurações</button>
       </div>
+      <div class="acct" id="slotInfo"></div>
+      <div class="acct" id="acctLine"></div>
       <div class="help" id="menuHelp">WASD andar · Mira no cursor · Botão direito + arrastar (ou mouse na borda) gira a câmera · Clique golpear · E pegar · F comer · Tab inventário · V câmera</div>
       <div class="mpnote" id="mpNote">Multiplayer: amigos com conta Claude, convidados pelo botão Compartilhar, aparecem aqui no mesmo Vale.</div>
     </div>
@@ -238,6 +275,7 @@ button:disabled{opacity:.4;cursor:default}
       <div class="btns">
         <button class="primary" id="bResume">Voltar ao jogo</button>
         <button id="bSave">Salvar agora</button>
+        <button id="bPauseSettings">Configurações</button>
         <button id="bMenu">Menu inicial</button>
       </div>
     </div>
@@ -258,35 +296,66 @@ button:disabled{opacity:.4;cursor:default}
         <div class="grid" id="gHot"></div>
         <div class="sub">MOCHILA</div>
         <div class="grid" id="gBag"></div>
+        <div class="sub">EQUIPAMENTO</div>
+        <div id="gEquip"></div>
+        <div id="effects"></div>
         <div id="info"></div>
         <button id="closeInv">Fechar</button>
       </div>
+      <div class="box" id="storeBox" style="display:none">
+        <div class="eyebrow" style="color:var(--amber)">Baú</div>
+        <div style="font-size:13px;color:var(--muted);margin:4px 0 8px">Clique num item do inventário para guardar; clique num item do baú para pegar.</div>
+        <div id="gStore"></div>
+      </div>
       <div class="box" id="recipes">
-        <div class="eyebrow" style="color:var(--cyan)">Fabricação · Era I</div>
+        <div class="eyebrow" style="color:var(--cyan)" id="recTitle">Fabricação · Era I</div>
         <div id="recList"></div>
       </div>
     </div>
   </div>
   <div id="rotate">Gire o celular<small>O Era Zero é jogado com a tela deitada.</small></div>
-  <div id="loading">GERANDO O VALE…</div>
+  <div class="screen" id="modes"><div class="panelbox"><h2>MODOS DE JOGO</h2><div id="modeList"></div><div class="mrow" style="margin-top:14px"><button id="bModesBack">Voltar</button></div></div></div>
+  <div class="screen" id="settings"><div class="panelbox"><h2>CONFIGURAÇÕES</h2>
+    <div class="setrow"><label>Qualidade gráfica</label><div id="qualBtns"></div></div>
+    <div class="acct" style="margin-top:0">Baixo é o melhor para celulares. Alto e Ultra mostram mais longe e mais detalhes.</div>
+    <div class="setrow"><label>Volume geral</label><input type="range" id="set_master" min="0" max="1" step="0.05"></div>
+    <div class="setrow"><label>Música</label><input type="range" id="set_music" min="0" max="1" step="0.05"></div>
+    <div class="setrow"><label>Efeitos</label><input type="range" id="set_sfx" min="0" max="1" step="0.05"></div>
+    <div class="setrow"><label>Ambiente</label><input type="range" id="set_amb" min="0" max="1" step="0.05"></div>
+    <div class="setrow"><label>Sensibilidade da câmera</label><input type="range" id="set_sens" min="0.3" max="2.5" step="0.05"></div>
+    <div class="setrow"><label>Mostrar FPS</label><input type="checkbox" id="set_fps"></div>
+    <div class="mrow" style="margin-top:14px"><button class="primary" id="bSetBack">Voltar</button></div></div></div>
+  <div class="screen" id="profile"><div class="panelbox"><h2>PERFIL</h2><div id="profAcct"></div><div id="profStats"></div><div class="eyebrow">Espécies avistadas</div><div id="profSpecies"></div>
+    <div class="mrow" style="margin-top:14px"><button class="primary" id="bProfBack">Voltar</button></div></div></div>
+  <div class="screen" id="achv"><div class="panelbox"><h2>CONQUISTAS</h2><div id="achList"></div><div class="mrow" style="margin-top:14px"><button class="primary" id="bAchBack">Voltar</button></div></div></div>
+  <div id="loading"><div id="loadWrap"><h1>ERA ZERO</h1><div id="loadTrack"><div id="loadBar"></div></div><div id="loadLbl">Carregando…</div></div></div>
 </div>
 
 <script src="js/lib/three.min.js"></script>
+<script src="js/lib/GLTFLoader.js"></script>
+<script src="js/lib/SkeletonUtils.js"></script>
 <script src="js/core.js"></script>
+<script src="js/settings.js"></script>
 <script src="js/render.js"></script>
 <script src="js/world.js"></script>
+<script src="js/items.js"></script>
 <script src="js/building.js"></script>
-<script src="js/creatures.js"></script>
+<script src="js/animals.js"></script>
 <script src="js/player.js"></script>
 <script src="js/input.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/interact.js"></script>
 <script src="js/daynight.js"></script>
+<script src="js/weather.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/icons2.js"></script>
+<script src="js/uiext.js"></script>
+<script src="js/modes.js"></script>
 <script src="js/save.js"></script>
 <script src="js/gfx.js"></script>
 <script src="js/avatar.js"></script>
 <script src="js/net.js"></script>
 <script src="js/cloud.js"></script>
+<script src="js/firebase.js"></script>
 <script src="js/main.js"></script>
 
