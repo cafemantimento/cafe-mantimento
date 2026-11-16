@@ -41,12 +41,14 @@ let fpsN=0,fpsT=0,fpsV=0;
 function updateForges(dt){if(G.state!=='play')return;for(const f of forges()){const q=f.ore.cobre+f.ore.ferro;if(!q){f.timer=0;continue;}f.timer+=dt;if(f.timer>=8){f.timer=0;const k=f.ore.cobre?'cobre':'ferro';f.ore[k]--;f.ingots[k]++;}}}
 // carrega os modelos dos animais (Quaternius, CC0)
 function loadAnimals(onP){if(!THREE.GLTFLoader)return Promise.resolve();const names=['Deer','Stag','Fox','Wolf','Alpaca','Horse','Bull'];let done=0;const L=new THREE.GLTFLoader();
-  return Promise.all(names.map(n=>new Promise(res=>{L.load('assets/animals/'+n+'.glb',gl=>{const box=new THREE.Box3().setFromObject(gl.scene);GLTF_ANIMALS[n]={scene:gl.scene,clips:gl.animations,height:Math.max(0.1,box.max.y-box.min.y)};done++;onP(done/names.length);res();},undefined,()=>{done++;onP(done/names.length);res();});})));}
+  return Promise.all(names.map(n=>new Promise(res=>{L.load('assets/animals/'+n+(IN_CLAUDE?'.gltf.json':'.glb'),gl=>{const box=new THREE.Box3().setFromObject(gl.scene);GLTF_ANIMALS[n]={scene:gl.scene,clips:gl.animations,height:Math.max(0.1,box.max.y-box.min.y)};done++;onP(done/names.length);res();},undefined,()=>{done++;onP(done/names.length);res();});})));}
+// nas páginas do Claude os modelos vão em JSON (o Claude não serve arquivos binários)
+const IN_CLAUDE=!!(window.claude&&window.claude.use);
 const nextFrame=()=>new Promise(r=>requestAnimationFrame(()=>r()));
 async function boot(){
   setLoading(0.05,'Gerando o relevo do Vale…');await nextFrame();applyQuality();
   setLoading(0.2,'Carregando árvores, pedras e plantas…');
-  try{const [bin,info]=await Promise.all([fetch('assets/nature/nature_pack.bin').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer();}),fetch('assets/nature/nature_pack.json').then(r=>r.json())]);decodeNature(bin,info);}catch(e){console.warn('Pacote da natureza indisponível; usando modelos simples');}
+  try{const [bin,info]=await Promise.all([IN_CLAUDE?fetch('assets/nature/nature_pack.b64.json').then(r=>r.json()).then(j=>{const s=atob(j.b64);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;}):fetch('assets/nature/nature_pack.bin').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer();}),fetch('assets/nature/nature_pack.json').then(r=>r.json())]);decodeNature(bin,info);}catch(e){console.warn('Pacote da natureza indisponível; usando modelos simples');}
   setLoading(0.4,'Carregando os animais…');await loadAnimals(p=>setLoading(0.4+p*0.4,'Carregando os animais…'));
   setLoading(0.85,'Espalhando a vida pelo Vale…');await nextFrame();populateWorld();
   setLoading(1,'Pronto');await nextFrame();
