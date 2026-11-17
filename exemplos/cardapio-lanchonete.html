@@ -1,0 +1,669 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Lanchonete Esquina 38</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Cardápio digital de exemplo: lanches, pastéis, porções, bebidas e açaí, com pedido pelo WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Shrikhand&display=swap">
+<style>
+/* Layout: letreiro de azulejo no topo, barra de categorias fixa, lista de itens em 1–2 colunas, sacola que sobe de baixo (ou da direita no desktop). */
+:root{
+  --tile:#0F5B53; --tile-2:#0B4741; --tile-line:rgba(255,255,255,.09);
+  --mustard:#F2B33D; --on-mustard:#1E1A0E;
+  --ketchup:#C93A28; --on-ketchup:#FFFFFF;
+  --bg:#F1F4F1; --surface:#FFFFFF; --ink:#15211E; --muted:#5A6863; --line:#DAE2DE; --chip:#E4EBE7;
+  --veg:#2F7D3A; --shadow:0 10px 30px rgba(15,40,35,.14);
+  --f-logo:"Shrikhand", "Bricolage Grotesque", Georgia, serif;
+  --f-head:"Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --tile:#0D4A44; --tile-2:#0A3934; --tile-line:rgba(255,255,255,.07);
+  --ketchup:#EE5D47; --on-ketchup:#1A0B08;
+  --bg:#0D1412; --surface:#151F1C; --ink:#E7EEEB; --muted:#98A7A2; --line:#25322E; --chip:#1D2926;
+  --veg:#7BC985; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --tile:#0D4A44; --tile-2:#0A3934; --tile-line:rgba(255,255,255,.07);
+  --ketchup:#EE5D47; --on-ketchup:#1A0B08;
+  --bg:#0D1412; --surface:#151F1C; --ink:#E7EEEB; --muted:#98A7A2; --line:#25322E; --chip:#1D2926;
+  --veg:#7BC985; --shadow:0 10px 30px rgba(0,0,0,.45); color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 132px)}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--f-body);margin:0;padding-bottom:96px;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--mustard);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-head);margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--surface)}
+
+/* ---------- Letreiro ---------- */
+.sign{background-color:var(--tile);color:#fff;
+  background-image:linear-gradient(var(--tile-line) 1px,transparent 1px),linear-gradient(90deg,var(--tile-line) 1px,transparent 1px);
+  background-size:28px 28px;border-bottom:6px solid var(--mustard)}
+.sign .wrap{padding-block:28px 26px;display:grid;gap:18px;grid-template-columns:auto 1fr;align-items:center}
+.badge{width:84px;height:84px;border-radius:50%;background:var(--mustard);color:var(--on-mustard);display:grid;place-items:center;
+  font:800 13px/1 var(--f-head);text-align:center;letter-spacing:.06em;text-transform:uppercase;box-shadow:inset 0 0 0 4px var(--tile),inset 0 0 0 6px var(--mustard)}
+.badge b{display:block;font:400 34px/0.9 var(--f-logo);letter-spacing:0}
+.sign h1{font:400 clamp(30px,6vw,52px)/1 var(--f-logo);color:var(--mustard);letter-spacing:.01em;text-shadow:0 3px 0 var(--tile-2)}
+.sign .tag{margin:6px 0 0;color:rgba(255,255,255,.82);font-size:15px}
+.facts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
+.fact{display:inline-flex;align-items:center;gap:7px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 12px;font-size:14px;color:#fff}
+.fact svg{width:16px;height:16px;flex:none}
+.status{font-weight:600}
+.status i{width:9px;height:9px;border-radius:50%;background:#7EE08B;box-shadow:0 0 0 3px rgba(126,224,139,.25)}
+.status.closed i{background:#FF8A7A;box-shadow:0 0 0 3px rgba(255,138,122,.25)}
+
+/* ---------- Barra fixa ---------- */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .wrap{display:grid;gap:10px;padding-block:12px 10px}
+.search{position:relative}
+.search svg{position:absolute;left:14px;top:50%;translate:0 -50%;width:18px;height:18px;color:var(--muted);pointer-events:none}
+.search input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:11px 40px 11px 42px;outline:none}
+.search input:focus{border-color:var(--ink)}
+.search .clear{position:absolute;right:6px;top:50%;translate:0 -50%;width:32px;height:32px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1}
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:2px max(16px,env(safe-area-inset-left,0px))}
+.cats::-webkit-scrollbar{display:none}
+.cats a{flex:none;text-decoration:none;color:var(--muted);font-weight:600;font-size:14.5px;padding:7px 13px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s}
+.cats a:hover{color:var(--ink)}
+.cats a.on{background:var(--ink);color:var(--bg)}
+
+/* ---------- Filtros ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;padding-block:18px 4px}
+.fchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:14px;font-weight:500;color:var(--ink);display:inline-flex;gap:6px;align-items:center}
+.fchip[aria-pressed="true"]{background:var(--mustard);border-color:var(--mustard);color:var(--on-mustard)}
+
+/* ---------- Destaques ---------- */
+.feat{padding-block:18px 6px}
+.eyebrow{font:700 12px/1 var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--ketchup);margin:0 0 10px}
+.feat-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}
+.fcard{scroll-snap-align:start;text-align:left;border:0;border-radius:var(--r);background:var(--tile);color:#fff;padding:16px;display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:end;min-height:150px;position:relative;overflow:hidden}
+.fcard:nth-child(2){background:var(--ketchup);color:var(--on-ketchup)}
+.fcard:nth-child(3){background:var(--mustard);color:var(--on-mustard)}
+.fcard .k{font:700 11px/1 var(--f-body);letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.fcard .n{font:800 22px/1.05 var(--f-head);margin-top:6px;display:block}
+.fcard .p{font:800 18px/1 var(--f-head);margin-top:12px;display:block}
+.fcard .p s{font-weight:500;font-size:14px;opacity:.7;margin-right:6px}
+.fcard .art{width:92px;height:92px;align-self:center}
+
+/* ---------- Seções e itens ---------- */
+.sec{padding-block:26px 6px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;border-bottom:2px solid var(--ink);padding-bottom:8px}
+.sec-h h2{font-weight:800;font-size:clamp(24px,3.4vw,30px);letter-spacing:-.01em}
+.sec-h span{color:var(--muted);font-size:14px}
+.sec-note{color:var(--muted);font-size:14px;margin:-4px 0 12px}
+.grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+.item{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:1fr 96px;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;transition:border-color .2s,transform .2s}
+.item:hover{border-color:var(--muted)}
+.item:active{transform:scale(.99)}
+.item:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+.item .txt{min-width:0;display:grid;gap:5px}
+.item .nm{font:700 17px/1.2 var(--f-head)}
+.item .ds{color:var(--muted);font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .pr{font:800 16px/1 var(--f-head);display:flex;gap:8px;align-items:baseline;margin-top:3px}
+.item .pr s{color:var(--muted);font-weight:500;font-size:13px}
+.item .pr small{font:500 12px var(--f-body);color:var(--muted)}
+.item .art{width:96px;height:96px;border-radius:12px;background:var(--chip);display:grid;place-items:center;position:relative}
+.item .art svg{width:78px;height:78px}
+.item .qtyb{position:absolute;top:-6px;right:-6px;min-width:24px;height:24px;border-radius:12px;background:var(--ketchup);color:var(--on-ketchup);font:700 13px/24px var(--f-body);text-align:center;padding:0 6px}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.t{font-size:11.5px;font-weight:700;letter-spacing:.03em;padding:3px 8px;border-radius:6px;background:var(--chip);color:var(--ink)}
+.t.top{background:var(--mustard);color:var(--on-mustard)}
+.t.veg{color:var(--veg)}
+.t.promo{background:var(--ketchup);color:var(--on-ketchup)}
+.t.hot{color:var(--ketchup)}
+.empty{padding:48px 0;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font:700 20px var(--f-head);margin-bottom:6px}
+
+/* ---------- Rodapé ---------- */
+.foot{margin-top:40px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.foot .wrap{padding-block:28px;display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.foot h3{font:700 15px var(--f-head);color:var(--ink);margin-bottom:8px}
+.foot table{border-collapse:collapse;width:100%}
+.foot td{padding:3px 0}.foot td+td{text-align:right}
+.foot tr.today td{color:var(--ink);font-weight:700}
+.foot p{margin:0 0 6px}
+
+/* ---------- Barra da sacola ---------- */
+.cartbar{position:fixed;left:0;right:0;bottom:0;z-index:35;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));pointer-events:none;transition:translate .3s}
+.cartbar.hide{translate:0 120%}
+.cartbar button{pointer-events:auto;width:100%;max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:16px;background:var(--ketchup);color:var(--on-ketchup);padding:14px 18px;font-weight:700;font-size:16px;box-shadow:var(--shadow)}
+.cartbar .cnt{background:rgba(0,0,0,.18);border-radius:8px;padding:2px 9px;margin-right:10px}
+
+/* ---------- Folhas (item e sacola) ---------- */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(5,15,12,.55);display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .25s}
+.scrim.open{opacity:1}
+.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:560px;max-height:92vh;max-height:92dvh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;translate:0 40px;transition:translate .3s;overflow:hidden}
+.scrim.open .sheet{translate:0 0}
+@media (min-width:760px){
+  .scrim{align-items:center}
+  .sheet{border-radius:20px;max-height:86vh}
+  .scrim.side{justify-content:flex-end;align-items:stretch}
+  .scrim.side .sheet{max-height:none;height:100%;border-radius:0;max-width:440px;translate:40px 0}
+  .scrim.side.open .sheet{translate:0 0}
+}
+.sh-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sh-head h2{font-size:20px;font-weight:800}
+.x{width:38px;height:38px;border-radius:50%;border:0;background:var(--chip);font-size:22px;line-height:1;display:grid;place-items:center;flex:none}
+.sh-body{overflow-y:auto;padding:0 16px 16px;flex:1;overscroll-behavior:contain}
+.sh-foot{border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center}
+.hero-art{background:var(--chip);margin:0 -16px;display:grid;place-items:center;padding:18px 0}
+.hero-art svg{width:150px;height:150px}
+.it-name{font-size:26px;font-weight:800;margin-top:16px}
+.it-desc{color:var(--muted);margin:6px 0 0}
+.it-price{font:800 20px var(--f-head);margin-top:10px}
+.grp{margin-top:20px;border:0;padding:0;min-width:0}
+.grp legend{display:flex;justify-content:space-between;align-items:center;width:100%;gap:8px;background:var(--chip);padding:10px 12px;border-radius:10px;font-weight:700}
+.grp legend small{font-weight:600;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.grp legend small.req{background:var(--ink);color:var(--bg);padding:3px 8px;border-radius:6px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.opt:last-child{border-bottom:0}
+.opt span{flex:1}
+.opt em{font-style:normal;color:var(--muted);font-size:14px}
+.opt input{width:20px;height:20px;accent-color:var(--ketchup);flex:none;margin:0}
+.opt.dis{opacity:.45;cursor:not-allowed}
+label.lb{display:block;font-weight:700;margin:20px 0 8px}
+textarea,.field{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px;resize:vertical}
+textarea:focus,.field:focus{outline:2px solid var(--ink);outline-offset:0}
+.step{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:12px;flex:none}
+.step button{width:40px;height:44px;border:0;background:transparent;font-size:20px;font-weight:700;color:var(--ketchup)}
+.step button:disabled{color:var(--muted);opacity:.5;cursor:default}
+.step output{min-width:26px;text-align:center;font-weight:700}
+.cta{flex:1;border:0;border-radius:12px;background:var(--ketchup);color:var(--on-ketchup);padding:13px 16px;font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:10px;text-decoration:none;align-items:center}
+.cta:disabled,.cta[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.ghost{border:1px solid var(--line);background:transparent;border-radius:12px;padding:12px 14px;font-weight:600}
+
+/* Sacola */
+.line{display:grid;grid-template-columns:52px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+.line .mini{width:52px;height:52px;border-radius:10px;background:var(--chip);display:grid;place-items:center}
+.line .mini svg{width:40px;height:40px}
+.line .ln{font-weight:700;line-height:1.25}
+.line .lx{color:var(--muted);font-size:13.5px;line-height:1.35;margin-top:3px}
+.line .lp{font-weight:700;text-align:right;display:grid;gap:8px;justify-items:end}
+.line .step button{width:32px;height:34px;font-size:18px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--chip);padding:4px;border-radius:12px}
+.seg label{text-align:center;padding:9px;border-radius:9px;font-weight:600;cursor:pointer;font-size:15px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg label:has(input:focus-visible){outline:3px solid var(--mustard)}
+.pay{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pay label{border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center;font-weight:600;cursor:pointer;font-size:14.5px}
+.pay input{position:absolute;opacity:0;pointer-events:none}
+.pay label:has(input:checked){border-color:var(--ketchup);color:var(--ketchup);box-shadow:inset 0 0 0 1px var(--ketchup)}
+.pay label:has(input:focus-visible){outline:3px solid var(--mustard)}
+.sum{margin-top:18px;display:grid;gap:6px}
+.sum div{display:flex;justify-content:space-between}
+.sum .tot{font:800 20px var(--f-head);border-top:1px dashed var(--line);padding-top:10px;margin-top:4px}
+.warn{background:color-mix(in srgb,var(--mustard) 22%,transparent);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:12px}
+.hint{font-size:13px;color:var(--muted);margin-top:10px}
+.cart-empty{text-align:center;padding:50px 10px;color:var(--muted)}
+.cart-empty b{display:block;color:var(--ink);font:700 19px var(--f-head);margin-bottom:6px}
+.foot-col{flex-direction:column;align-items:stretch}
+.foot-row{display:flex;gap:10px}
+
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));translate:-50% 20px;opacity:0;z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14.5px;transition:opacity .25s,translate .25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;translate:-50% 0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<header class="sign">
+  <div class="wrap">
+    <div class="badge" aria-hidden="true"><div><b>38</b>desde 1994</div></div>
+    <div>
+      <h1>Esquina 38</h1>
+      <p class="tag">Lanchonete de bairro. Chapa quente, pastel na hora e suco de verdade.</p>
+    </div>
+    <div class="facts">
+      <span class="fact status" id="status"><i></i><span>Verificando horário…</span></span>
+      <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Entrega 35–50 min</span>
+      <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>Taxa R$ 6,00</span>
+      <span class="fact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Rua das Acácias, 38 · Centro</span>
+    </div>
+  </div>
+</header>
+
+<nav class="bar" aria-label="Categorias do cardápio">
+  <div class="wrap">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label for="q" class="sr">Buscar no cardápio</label>
+      <input id="q" type="search" placeholder="Buscar: x-bacon, pastel, açaí…" autocomplete="off">
+      <button class="clear" id="qclear" type="button" aria-label="Limpar busca" hidden>×</button>
+    </div>
+    <div class="cats" id="cats"></div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="filters" role="group" aria-label="Filtros">
+    <button class="fchip" type="button" data-f="top" aria-pressed="false">★ Mais pedidos</button>
+    <button class="fchip" type="button" data-f="veg" aria-pressed="false">Vegetariano</button>
+    <button class="fchip" type="button" data-f="promo" aria-pressed="false">Promoção</button>
+    <button class="fchip" type="button" data-f="hot" aria-pressed="false">Apimentado</button>
+  </div>
+  <section class="feat" id="feat" aria-label="Destaques">
+    <p class="eyebrow">Destaques da casa</p>
+    <div class="feat-row" id="featRow"></div>
+  </section>
+  <div id="menu"></div>
+  <div class="empty" id="empty" hidden><b>Nada encontrado</b>Tente outro nome ou limpe os filtros.</div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div>
+      <h3>Horário de funcionamento</h3>
+      <table class="num" id="hours"></table>
+    </div>
+    <div>
+      <h3>Pagamento</h3>
+      <p>Pix, cartão de débito e crédito (na entrega) e dinheiro.</p>
+      <p>Pedido mínimo para entrega: R$ 20,00.</p>
+      <p>Entregamos em até 5 km da loja.</p>
+    </div>
+    <div>
+      <h3>Contato</h3>
+      <p>WhatsApp: <span class="num">(31) 90000-0038</span></p>
+      <p>Rua das Acácias, 38 · Centro</p>
+      <p style="font-size:12.5px">Cardápio de exemplo. Nome, endereço, telefone e preços são fictícios.</p>
+    </div>
+  </div>
+</footer>
+
+<div class="cartbar hide" id="cartbar">
+  <button type="button" id="openCart"><span><span class="cnt num" id="cbCount">0</span>Ver sacola</span><span class="num" id="cbTotal">R$ 0,00</span></button>
+</div>
+
+<div class="scrim" id="itemScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="itTitle" id="itemSheet"></div>
+</div>
+<div class="scrim side" id="cartScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cartTitle" id="cartSheet"></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const BRL = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+
+const STORE = {name:'Lanchonete Esquina 38', whatsapp:'5531900000038', fee:6, minOrder:20};
+
+/* ---------- Ilustrações ---------- */
+const ART = {
+burger:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M17 47Q17 20 50 20Q83 20 83 47Z" fill="#E59A3C"/><g fill="#FFF1CF"><ellipse cx="36" cy="31" rx="2.6" ry="1.5"/><ellipse cx="50" cy="27" rx="2.6" ry="1.5"/><ellipse cx="63" cy="32" rx="2.6" ry="1.5"/><ellipse cx="44" cy="38" rx="2.6" ry="1.5"/><ellipse cx="58" cy="40" rx="2.6" ry="1.5"/></g><path d="M13 50q6-6 12 0t12 0t12 0t12 0t12 0t12 0v5H13Z" fill="#5DB33E"/><rect x="18" y="49" width="16" height="5" rx="2" fill="#E2453A"/><rect x="58" y="49" width="16" height="5" rx="2" fill="#E2453A"/><rect x="15" y="55" width="70" height="13" rx="6.5" fill="#5A2E1A"/><path d="M15 55H85L79 64L71 58L61 66L51 58L41 66L31 58L22 64Z" fill="#F6C232"/><rect x="17" y="70" width="66" height="12" rx="6" fill="#D9862E"/></svg>`,
+bigburger:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M17 40Q17 14 50 14Q83 14 83 40Z" fill="#7A4A26"/><g fill="#F0D9B0"><ellipse cx="38" cy="24" rx="2.4" ry="1.4"/><ellipse cx="52" cy="21" rx="2.4" ry="1.4"/><ellipse cx="62" cy="28" rx="2.4" ry="1.4"/></g><path d="M15 42H85L80 48H20Z" fill="#B86A2B"/><rect x="15" y="46" width="70" height="11" rx="5.5" fill="#4B2414"/><path d="M15 46H85L80 54L72 49L62 56L52 49L42 56L32 49L22 54Z" fill="#F2A531"/><rect x="15" y="58" width="70" height="11" rx="5.5" fill="#4B2414"/><path d="M15 58H85L80 66L72 61L62 68L52 61L42 68L32 61L22 66Z" fill="#F2A531"/><rect x="17" y="71" width="66" height="12" rx="6" fill="#6B3F20"/></svg>`,
+veggie:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M17 47Q17 20 50 20Q83 20 83 47Z" fill="#C98A45"/><g fill="#8C5A2B"><circle cx="36" cy="32" r="1.6"/><circle cx="50" cy="27" r="1.6"/><circle cx="62" cy="33" r="1.6"/><circle cx="45" cy="39" r="1.6"/></g><path d="M13 50q6-6 12 0t12 0t12 0t12 0t12 0t12 0v5H13Z" fill="#5DB33E"/><rect x="15" y="55" width="70" height="13" rx="6.5" fill="#C9A23A"/><g fill="#9C7A22"><circle cx="30" cy="61" r="1.6"/><circle cx="46" cy="63" r="1.6"/><circle cx="62" cy="60" r="1.6"/><circle cx="74" cy="63" r="1.6"/></g><rect x="17" y="70" width="66" height="12" rx="6" fill="#B07535"/></svg>`,
+hotdog:`<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="10" y="50" width="80" height="24" rx="12" fill="#D9933F"/><rect x="5" y="40" width="90" height="15" rx="7.5" fill="#B5452B"/><path d="M15 47l7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4 7-4 7 4" fill="none" stroke="#F6C232" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 54h72v6a10 10 0 0 1-10 10H24a10 10 0 0 1-10-10z" fill="#EBB061"/><g fill="#F3D27A"><rect x="22" y="36" width="9" height="3" rx="1.5" transform="rotate(-20 26 37)"/><rect x="40" y="35" width="9" height="3" rx="1.5" transform="rotate(15 44 36)"/><rect x="58" y="36" width="9" height="3" rx="1.5" transform="rotate(-10 62 37)"/><rect x="72" y="35" width="9" height="3" rx="1.5" transform="rotate(25 76 36)"/></g></svg>`,
+pastel:`<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="12" y="28" width="76" height="46" rx="9" fill="#E9B65A"/><rect x="17" y="33" width="66" height="36" rx="6" fill="none" stroke="#C58A2E" stroke-width="2.5" stroke-dasharray="3 4"/><g fill="#F5D489"><circle cx="34" cy="45" r="5"/><circle cx="58" cy="52" r="6"/><circle cx="45" cy="58" r="3.5"/><circle cx="69" cy="42" r="3.5"/></g></svg>`,
+fries:`<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#F6C232"><rect x="30" y="16" width="7" height="44" rx="2" transform="rotate(-8 33 38)"/><rect x="40" y="12" width="7" height="48" rx="2"/><rect x="50" y="14" width="7" height="46" rx="2" transform="rotate(6 53 37)"/><rect x="60" y="18" width="7" height="42" rx="2" transform="rotate(12 63 39)"/><rect x="35" y="22" width="7" height="40" rx="2" transform="rotate(4 38 42)"/><rect x="55" y="22" width="7" height="40" rx="2" transform="rotate(-5 58 42)"/></g><path d="M24 46H76L69 88H31Z" fill="#D7372B"/><path d="M24 46H76L75 53H25Z" fill="#B42A20"/><circle cx="50" cy="69" r="8" fill="#F6C232"/></svg>`,
+loaded:`<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="70" rx="40" ry="14" fill="#E9E2D3"/><ellipse cx="50" cy="66" rx="34" ry="11" fill="#F6C232"/><g fill="#F9D457"><rect x="26" y="50" width="22" height="6" rx="2" transform="rotate(-18 37 53)"/><rect x="48" y="48" width="24" height="6" rx="2" transform="rotate(14 60 51)"/><rect x="36" y="56" width="26" height="6" rx="2" transform="rotate(4 49 59)"/></g><path d="M30 56q10 8 20 0t20 2" fill="none" stroke="#F29B1D" stroke-width="6" stroke-linecap="round"/><g fill="#9B3B22"><rect x="38" y="52" width="6" height="4" rx="1"/><rect x="56" y="55" width="6" height="4" rx="1"/><rect x="47" y="60" width="6" height="4" rx="1"/></g></svg>`,
+manioc:`<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="70" rx="40" ry="14" fill="#E9E2D3"/><g fill="#EAC97C" stroke="#C99A3E" stroke-width="1.5"><rect x="22" y="48" width="34" height="11" rx="5" transform="rotate(-20 39 53)"/><rect x="42" y="50" width="34" height="11" rx="5" transform="rotate(16 59 55)"/><rect x="32" y="58" width="36" height="11" rx="5" transform="rotate(3 50 63)"/></g></svg>`,
+sausage:`<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="70" rx="40" ry="14" fill="#E9E2D3"/><g fill="#A8432C" stroke="#7E2E1D" stroke-width="2"><ellipse cx="36" cy="60" rx="10" ry="7"/><ellipse cx="58" cy="57" rx="10" ry="7"/><ellipse cx="66" cy="68" rx="10" ry="7"/><ellipse cx="44" cy="70" rx="10" ry="7"/></g><g fill="none" stroke="#F1E6C8" stroke-width="2.5" stroke-linecap="round"><path d="M28 54q8-8 16 0"/><path d="M52 64q8-8 16 0"/><path d="M38 66q6-6 12 0"/></g></svg>`,
+chicken:`<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="70" rx="40" ry="14" fill="#E9E2D3"/><g fill="#C9802F"><path d="M26 64q2-16 16-14q8 2 4 12q-4 8-20 2z"/><path d="M50 60q4-14 18-10q8 4 2 12q-6 6-20-2z"/><path d="M40 72q4-10 16-8q8 2 4 8q-6 6-20 0z"/></g><g fill="#E7A858"><circle cx="34" cy="58" r="2.5"/><circle cx="60" cy="55" r="2.5"/><circle cx="50" cy="67" r="2.5"/></g><path d="M68 48l8-6" stroke="#5DB33E" stroke-width="3" stroke-linecap="round"/></svg>`,
+fish:`<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="70" rx="40" ry="14" fill="#E9E2D3"/><g fill="#E0A24B" stroke="#B87A2B" stroke-width="1.5"><rect x="24" y="52" width="28" height="12" rx="6" transform="rotate(-12 38 58)"/><rect x="48" y="54" width="28" height="12" rx="6" transform="rotate(10 62 60)"/><rect x="34" y="63" width="30" height="12" rx="6"/></g><path d="M70 48a7 7 0 1 1 10 4z" fill="#F4E04D"/></svg>`,
+can:`<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="32" y="18" width="36" height="66" rx="7" fill="#C8302A"/><rect x="34" y="16" width="32" height="6" rx="3" fill="#B9BEC0"/><rect x="34" y="80" width="32" height="6" rx="3" fill="#B9BEC0"/><path d="M32 42q18 10 36 0v14q-18 10-36 0z" fill="#FFFFFF" opacity=".9"/><rect x="40" y="24" width="4" height="54" rx="2" fill="#fff" opacity=".18"/></svg>`,
+bottle:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M43 10h14v10q10 8 10 22v42a6 6 0 0 1-6 6H39a6 6 0 0 1-6-6V42q0-14 10-22z" fill="#2A1A14"/><rect x="42" y="8" width="16" height="6" rx="2" fill="#D9312B"/><rect x="33" y="48" width="34" height="18" fill="#D9312B"/><rect x="33" y="52" width="34" height="3" fill="#fff" opacity=".8"/></svg>`,
+juice:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M28 24h44l-6 62H34z" fill="#DCEFF0" opacity=".9"/><path d="M30.5 40h39l-4.4 44H34.9z" fill="#F7A21B"/><circle cx="70" cy="26" r="13" fill="#F7A21B"/><circle cx="70" cy="26" r="10" fill="#FCD06B"/><path d="M70 16v20M60 26h20M63 19l14 14M77 19L63 33" stroke="#F7A21B" stroke-width="1.5"/><rect x="47" y="8" width="4" height="40" rx="2" fill="#2F8F5B" transform="rotate(-12 49 28)"/></svg>`,
+water:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M44 10h12v8q8 6 8 16v50a6 6 0 0 1-6 6H42a6 6 0 0 1-6-6V34q0-10 8-16z" fill="#BFE3F2"/><rect x="43" y="7" width="14" height="6" rx="2" fill="#2C7FB8"/><rect x="36" y="46" width="28" height="18" fill="#2C7FB8"/><path d="M50 50q4 5 0 9q-4-4 0-9z" fill="#fff"/></svg>`,
+cane:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M30 26h40l-5 60H35z" fill="#E6EED9"/><path d="M31.5 36h37l-4.2 50H35.7z" fill="#C3CF6B"/><rect x="66" y="8" width="7" height="58" rx="3" fill="#6E9A3A" transform="rotate(18 69 37)"/><path d="M64 18h10M62 32h10M60 46h10" stroke="#4E7426" stroke-width="2" transform="rotate(18 69 37)"/></svg>`,
+acai:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M16 50h68q-4 32-34 32T16 50z" fill="#ECE4F0"/><ellipse cx="50" cy="50" rx="34" ry="9" fill="#4A1F5C"/><g fill="#F5E6A8"><ellipse cx="38" cy="47" rx="7" ry="4"/><ellipse cx="54" cy="45" rx="7" ry="4"/></g><g fill="#D9363E"><path d="M64 44q6-4 8 2q-2 6-8 2z"/><path d="M30 52q5-3 7 2q-2 5-7 2z"/></g><g fill="#B98A4A"><circle cx="46" cy="53" r="1.6"/><circle cx="58" cy="52" r="1.6"/><circle cx="68" cy="50" r="1.6"/><circle cx="40" cy="54" r="1.6"/></g></svg>`,
+pudim:`<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="78" rx="40" ry="9" fill="#E9E2D3"/><path d="M26 74L32 38H68L74 74Z" fill="#F2C46D"/><path d="M32 38H68L70 50Q60 46 50 52Q40 46 30 50Z" fill="#8E4A12"/><ellipse cx="50" cy="38" rx="18" ry="5" fill="#A55A18"/><path d="M28 76q22 6 44 0" stroke="#A55A18" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
+shake:`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M30 34h40l-6 54H36z" fill="#F4C9D6"/><path d="M28 34q4-14 22-14t22 14z" fill="#FFF6EE"/><circle cx="50" cy="16" r="5" fill="#D9363E"/><rect x="58" y="4" width="4" height="30" rx="2" fill="#4AA3C7" transform="rotate(14 60 19)"/><path d="M32 52h36" stroke="#E7A5B9" stroke-width="3"/></svg>`,
+combo:`<svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(-6 10) scale(.72)"><path d="M17 47Q17 20 50 20Q83 20 83 47Z" fill="#E59A3C"/><path d="M13 50q6-6 12 0t12 0t12 0t12 0t12 0t12 0v5H13Z" fill="#5DB33E"/><rect x="15" y="55" width="70" height="13" rx="6.5" fill="#5A2E1A"/><path d="M15 55H85L79 64L71 58L61 66L51 58L41 66L31 58L22 64Z" fill="#F6C232"/><rect x="17" y="70" width="66" height="12" rx="6" fill="#D9862E"/></g><g transform="translate(50 18) scale(.55)"><g fill="#F6C232"><rect x="30" y="16" width="7" height="44" rx="2" transform="rotate(-8 33 38)"/><rect x="40" y="12" width="7" height="48" rx="2"/><rect x="50" y="14" width="7" height="46" rx="2" transform="rotate(6 53 37)"/><rect x="60" y="18" width="7" height="42" rx="2" transform="rotate(12 63 39)"/></g><path d="M24 46H76L69 88H31Z" fill="#D7372B"/></g><g transform="translate(62 50) scale(.42)"><rect x="32" y="18" width="36" height="66" rx="7" fill="#C8302A"/><path d="M32 42q18 10 36 0v14q-18 10-36 0z" fill="#fff"/></g></svg>`,
+kids:`<svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(4 12) scale(.62)"><path d="M17 47Q17 20 50 20Q83 20 83 47Z" fill="#E59A3C"/><rect x="15" y="55" width="70" height="13" rx="6.5" fill="#5A2E1A"/><path d="M15 55H85L79 64L71 58L61 66L51 58L41 66L31 58L22 64Z" fill="#F6C232"/><rect x="17" y="70" width="66" height="12" rx="6" fill="#D9862E"/></g><g transform="translate(52 30) scale(.5)"><path d="M28 24h44l-6 62H34z" fill="#DCEFF0"/><path d="M30.5 40h39l-4.4 44H34.9z" fill="#F7A21B"/></g><path d="M18 26l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#F2B33D"/></svg>`,
+cheese:`<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="12" y="28" width="76" height="46" rx="9" fill="#EDBE63"/><rect x="17" y="33" width="66" height="36" rx="6" fill="none" stroke="#C58A2E" stroke-width="2.5" stroke-dasharray="3 4"/><path d="M60 74q2 10 8 10q4 0 4-6v-4z" fill="#FBE59A"/><g fill="#F7D98C"><circle cx="36" cy="46" r="4"/><circle cx="54" cy="54" r="5"/></g></svg>`
+};
+
+/* ---------- Grupos de opções ---------- */
+const G = {
+  pao:{t:'Pão',one:true,req:true,o:[['Pão de hambúrguer',0],['Pão australiano',2],['Pão francês na chapa',0]]},
+  add:{t:'Adicionais',max:5,o:[['Bacon',5],['Ovo',3],['Cheddar cremoso',4],['Catupiry',4],['Hambúrguer extra (120 g)',8],['Cebola caramelizada',3]]},
+  sem:{t:'Retirar ingredientes',o:[['Sem cebola',0],['Sem tomate',0],['Sem maionese',0],['Sem milho e ervilha',0]]},
+  molho:{t:'Molhos (sachê)',max:3,o:[['Maionese da casa',0],['Ketchup',0],['Mostarda',0],['Barbecue',0],['Molho de alho',0]]},
+  ponto:{t:'Ponto da carne',one:true,req:true,o:[['Ao ponto',0],['Bem passado',0],['Mal passado',0]]},
+  refri:{t:'Sabor do refrigerante',one:true,req:true,o:[['Coca-Cola',0],['Coca-Cola Zero',0],['Guaraná Antarctica',0],['Fanta Laranja',0],['Sprite',0]]},
+  refri2l:{t:'Sabor',one:true,req:true,o:[['Coca-Cola 2 L',0],['Guaraná Antarctica 2 L',0],['Fanta Laranja 2 L',0]]},
+  suco:{t:'Sabor',one:true,req:true,o:[['Laranja',0],['Maracujá',0],['Abacaxi com hortelã',0],['Limão',0],['Morango',2]]},
+  preparo:{t:'Preparo',one:true,req:true,o:[['Com água',0],['Com leite',2]]},
+  acucar:{t:'Açúcar',one:true,req:true,o:[['Com açúcar',0],['Sem açúcar',0],['Com adoçante',0]]},
+  acaiTam:{t:'Tamanho',one:true,req:true,o:[['300 ml',0],['500 ml',6],['700 ml',12]]},
+  acaiAdd:{t:'Complementos',max:4,o:[['Banana',2],['Granola',2],['Leite condensado',2],['Leite em pó',2],['Paçoca',2],['Morango',4],['Nutella',6]]},
+  shake:{t:'Sabor',one:true,req:true,o:[['Ovomaltine',0],['Morango',0],['Chocolate',0],['Doce de leite',0]]},
+  pastelTam:{t:'Tamanho',one:true,req:true,o:[['Médio',0],['Gigante (30 cm)',7]]},
+  porcao:inc=>({t:'Tamanho',one:true,req:true,o:[['Meia porção',0],['Porção inteira',inc]]}),
+  kidsBeb:{t:'Bebida',one:true,req:true,o:[['Suco de laranja 300 ml',0],['Guaraná lata',0],['Água',0]]}
+};
+
+/* ---------- Cardápio ---------- */
+const CATS = [
+ {id:'combos',n:'Combos',note:'Lanche + acompanhamento + bebida, mais barato que separado.'},
+ {id:'lanches',n:'Lanches na chapa',note:'Hambúrguer artesanal de 120 g, pão selado na manteiga.'},
+ {id:'dogs',n:'Cachorro-quente'},
+ {id:'pasteis',n:'Pastéis',note:'Massa aberta na hora. Médio ou gigante.'},
+ {id:'porcoes',n:'Porções',note:'Meia porção serve 1–2 pessoas. Inteira serve 3–4.'},
+ {id:'bebidas',n:'Bebidas'},
+ {id:'doces',n:'Açaí e sobremesas'}
+];
+const I = (id,cat,n,d,p,art,tags=[],groups=[],from)=>({id,cat,n,d,p,art,tags,groups,from});
+const ITEMS = [
+ I('cb-xtudo','combos','Combo X-Tudo','X-Tudo, batata frita média e refrigerante lata.',49.9,'combo',['top','promo'],[G.refri,G.sem,G.molho],56.7),
+ I('cb-casal','combos','Combo Casal','2 X-Salada, meia porção de batata e refrigerante 2 L.',79.9,'combo',['promo'],[G.refri2l,G.molho],92.6),
+ I('cb-smash','combos','Combo Smash Duplo','Smash duplo, batata com cheddar e bacon e refrigerante lata.',54.9,'bigburger',['novo'],[G.refri,G.molho],61.3),
+ I('cb-kids','combos','Combo Kids','Mini X-Burguer, batatinha e bebida. Acompanha brinde.',29.9,'kids',[],[G.kidsBeb]),
+
+ I('x-burguer','lanches','X-Burguer','Hambúrguer, queijo prato e maionese da casa.',22.9,'burger',[],[G.pao,G.ponto,G.add,G.sem]),
+ I('x-salada','lanches','X-Salada','Hambúrguer, queijo, alface, tomate e maionese da casa.',25.9,'burger',[],[G.pao,G.ponto,G.add,G.sem]),
+ I('x-bacon','lanches','X-Bacon','Hambúrguer, queijo, bacon crocante, alface e tomate.',29.9,'burger',['top'],[G.pao,G.ponto,G.add,G.sem]),
+ I('x-egg','lanches','X-Egg','Hambúrguer, ovo, queijo, alface, tomate e milho.',26.9,'burger',[],[G.pao,G.ponto,G.add,G.sem]),
+ I('x-tudo','lanches','X-Tudo','Dois hambúrgueres, ovo, bacon, presunto, queijo, salsicha, alface, tomate, milho e batata palha.',36.9,'bigburger',['top'],[G.pao,G.ponto,G.add,G.sem]),
+ I('x-frango','lanches','X-Frango','Filé de frango grelhado, queijo, alface, tomate e catupiry.',27.9,'burger',[],[G.pao,G.add,G.sem]),
+ I('smash','lanches','Smash Duplo','Dois smash de 90 g, cheddar duplo, cebola caramelizada e picles no pão brioche.',34.9,'bigburger',['novo'],[G.add,G.sem]),
+ I('picante','lanches','X-Brasa','Hambúrguer, pepper jack, jalapeño, cebola roxa e maionese de pimenta-biquinho.',31.9,'burger',['hot'],[G.pao,G.ponto,G.add,G.sem]),
+ I('veggie','lanches','Burger de Grão-de-Bico','Hambúrguer de grão-de-bico, queijo, rúcula, tomate e maionese verde.',29.9,'veggie',['veg'],[G.pao,G.add,G.sem]),
+
+ I('dog-simples','dogs','Cachorro-quente simples','Salsicha, molho de tomate caseiro, milho e batata palha.',14.9,'hotdog',[],[G.sem,G.molho]),
+ I('dogao','dogs','Dogão completo','Duas salsichas, purê de batata, vinagrete, milho, ervilha, queijo ralado e batata palha.',22.9,'hotdog',['top'],[G.sem,G.molho]),
+ I('dog-frango','dogs','Dog de frango','Frango desfiado, catupiry, milho e batata palha.',21.9,'hotdog',[],[G.sem,G.molho]),
+ I('dog-calabresa','dogs','Dog de calabresa','Linguiça calabresa na chapa, vinagrete, cheddar e pimenta.',23.9,'hotdog',['hot'],[G.sem,G.molho]),
+
+ I('p-carne','pasteis','Pastel de carne','Carne moída temperada com azeitona e ovo.',12.9,'pastel',['top'],[G.pastelTam]),
+ I('p-queijo','pasteis','Pastel de queijo','Muçarela que estica.',11.9,'cheese',['veg'],[G.pastelTam]),
+ I('p-frango','pasteis','Pastel de frango com catupiry','Frango desfiado e catupiry.',13.9,'pastel',[],[G.pastelTam]),
+ I('p-pizza','pasteis','Pastel de pizza','Muçarela, presunto, tomate e orégano.',12.9,'pastel',[],[G.pastelTam]),
+ I('p-palmito','pasteis','Pastel de palmito','Palmito refogado com tomate e cheiro-verde.',13.9,'pastel',['veg'],[G.pastelTam]),
+ I('p-banana','pasteis','Pastel de banana com canela','Banana, açúcar e canela. Doce.',11.9,'pastel',['veg'],[G.pastelTam]),
+
+ I('batata','porcoes','Batata frita','Batata palito sequinha com sal.',19.9,'fries',['veg'],[G.porcao(14),G.molho]),
+ I('batata-cb','porcoes','Batata com cheddar e bacon','Batata frita coberta com cheddar cremoso e bacon em cubos.',29.9,'loaded',['top'],[G.porcao(16),G.molho]),
+ I('mandioca','porcoes','Mandioca frita','Mandioca cozida e frita, crocante por fora.',21.9,'manioc',['veg'],[G.porcao(14),G.molho]),
+ I('calabresa','porcoes','Calabresa acebolada','Calabresa fatiada com cebola na chapa. Acompanha pão.',27.9,'sausage',[],[G.porcao(16)]),
+ I('passarinho','porcoes','Frango a passarinho','Frango temperado com alho, frito e finalizado com salsinha.',29.9,'chicken',[],[G.porcao(18),G.molho]),
+ I('tilapia','porcoes','Isca de tilápia','Tilápia empanada com limão e molho tártaro.',34.9,'fish',[],[G.porcao(20)]),
+
+ I('lata','bebidas','Refrigerante lata','350 ml, bem gelado.',6.5,'can',[],[G.refri]),
+ I('2l','bebidas','Refrigerante 2 L','Para dividir.',14.9,'bottle',[],[G.refri2l]),
+ I('suco','bebidas','Suco natural 500 ml','Feito na hora com fruta.',11.9,'juice',['top'],[G.suco,G.preparo,G.acucar]),
+ I('cana','bebidas','Caldo de cana 500 ml','Com limão, moído na hora.',9.9,'cane',[],[G.acucar]),
+ I('agua','bebidas','Água mineral 500 ml','Com ou sem gás.',4,'water',[],[{t:'Tipo',one:true,req:true,o:[['Sem gás',0],['Com gás',0.5]]}]),
+
+ I('acai','doces','Açaí na tigela','Açaí cremoso batido com guaraná. Escolha o tamanho e até 4 complementos.',16.9,'acai',['top'],[G.acaiTam,G.acaiAdd]),
+ I('shake','doces','Milkshake 400 ml','Sorvete batido com leite e calda.',18.9,'shake',[],[G.shake]),
+ I('pudim','doces','Pudim de leite (fatia)','Receita da casa, com calda de caramelo.',9.9,'pudim',['veg'],[]),
+];
+const BY = Object.fromEntries(ITEMS.map(i=>[i.id,i]));
+const TAG = {top:['top','★ Mais pedido'],veg:['veg','Vegetariano'],promo:['promo','Promoção'],hot:['hot','Apimentado'],novo:['', 'Novo']};
+const FEATURED = ['cb-xtudo','smash','acai'];
+
+/* ---------- Estado ---------- */
+let cart = [];
+try{ cart = JSON.parse(localStorage.getItem('e38-cart')||'[]').filter(l=>BY[l.id]); }catch(e){ cart = []; }
+let form = {mode:'entrega',name:'',addr:'',pay:'Pix',troco:''};
+try{ Object.assign(form, JSON.parse(localStorage.getItem('e38-form')||'{}')); }catch(e){}
+const save = ()=>{ try{ localStorage.setItem('e38-cart',JSON.stringify(cart)); localStorage.setItem('e38-form',JSON.stringify(form)); }catch(e){} };
+const filters = new Set();
+let query = '';
+
+/* ---------- Horário ---------- */
+const HOURS = [ // 0 = domingo
+ ['Domingo',[16,0],[22,0]],['Segunda',[10,0],[22,0]],['Terça',[10,0],[22,0]],['Quarta',[10,0],[22,0]],
+ ['Quinta',[10,0],[22,0]],['Sexta',[10,0],[23,30]],['Sábado',[10,0],[23,30]]];
+const hm = a=>String(a[0]).padStart(2,'0')+'h'+(a[1]?String(a[1]).padStart(2,'0'):'');
+function renderHours(){
+  const now = new Date(), d = now.getDay(), mins = now.getHours()*60+now.getMinutes();
+  const order=[1,2,3,4,5,6,0];
+  $('#hours').innerHTML = order.map(i=>`<tr class="${i===d?'today':''}"><td>${HOURS[i][0]}</td><td>${hm(HOURS[i][1])} – ${hm(HOURS[i][2])}</td></tr>`).join('');
+  const [, o, c] = HOURS[d]; const om=o[0]*60+o[1], cm=c[0]*60+c[1];
+  const st = $('#status'); let txt;
+  if(mins>=om && mins<cm){ st.classList.remove('closed'); txt = `Aberto agora · até ${hm(c)}`; }
+  else { st.classList.add('closed');
+    if(mins<om) txt = `Fechado · abre hoje às ${hm(o)}`;
+    else { const n=HOURS[(d+1)%7]; txt = `Fechado · abre amanhã às ${hm(n[1])}`; } }
+  st.querySelector('span').textContent = txt;
+}
+
+/* ---------- Render cardápio ---------- */
+const priceHTML = it=>`${it.from?`<s class="num">${BRL.format(it.from)}</s>`:''}<span class="num">${it.groups.some(g=>g.one&&g.o.some(x=>x[1]>0))?'<small>a partir de </small>':''}${BRL.format(it.p)}</span>`;
+const tagsHTML = it=>it.tags.length?`<span class="tags">${it.tags.map(t=>`<span class="t ${TAG[t][0]}">${TAG[t][1]}</span>`).join('')}</span>`:'';
+const inCart = id=>cart.filter(l=>l.id===id).reduce((s,l)=>s+l.qty,0);
+
+function renderCats(){
+  $('#cats').innerHTML = CATS.map(c=>`<a href="#${c.id}" data-c="${c.id}">${esc(c.n)}</a>`).join('');
+}
+function renderFeatured(){
+  const labels=['Combo mais pedido','Novidade','Sobremesa'];
+  $('#featRow').innerHTML = FEATURED.map((id,i)=>{const it=BY[id];return `<button class="fcard" type="button" data-id="${id}">
+   <span><span class="k">${labels[i]}</span><span class="n">${esc(it.n)}</span><span class="p num">${it.from?`<s>${BRL.format(it.from)}</s>`:''}${BRL.format(it.p)}</span></span>
+   <span class="art">${ART[it.art]}</span></button>`}).join('');
+}
+function matches(it){
+  for(const f of filters) if(!it.tags.includes(f)) return false;
+  if(!query) return true;
+  return norm(it.n+' '+it.d).includes(query);
+}
+function renderMenu(){
+  let total=0;
+  $('#menu').innerHTML = CATS.map(c=>{
+    const list = ITEMS.filter(i=>i.cat===c.id && matches(i)); total+=list.length;
+    if(!list.length) return '';
+    return `<section class="sec" id="${c.id}" aria-labelledby="h-${c.id}">
+      <div class="sec-h"><h2 id="h-${c.id}">${esc(c.n)}</h2><span>${list.length} ${list.length>1?'itens':'item'}</span></div>
+      ${c.note?`<p class="sec-note">${esc(c.note)}</p>`:''}
+      <div class="grid">${list.map(it=>{const q=inCart(it.id);return `<button class="item" type="button" data-id="${it.id}" aria-label="${esc(it.n)}, ${BRL.format(it.p)}${q?`, ${q} na sacola`:''}">
+        <span class="txt"><span class="nm">${esc(it.n)}</span><span class="ds">${esc(it.d)}</span>${tagsHTML(it)}<span class="pr">${priceHTML(it)}</span></span>
+        <span class="art">${ART[it.art]}${q?`<span class="qtyb num">${q}</span>`:''}</span></button>`}).join('')}</div></section>`;
+  }).join('');
+  $('#empty').hidden = total>0;
+  $('#feat').hidden = !!(query || filters.size);
+  document.querySelectorAll('#cats a').forEach(a=>{a.hidden = !document.getElementById(a.dataset.c);});
+  spy();
+}
+
+/* Categoria ativa conforme a rolagem */
+let io;
+function spy(){
+  io && io.disconnect();
+  const secs=[...document.querySelectorAll('.sec')];
+  io = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ setActive(e.target.id); } });
+  },{rootMargin:'-140px 0px -60% 0px'});
+  secs.forEach(s=>io.observe(s));
+}
+function setActive(id){
+  document.querySelectorAll('#cats a').forEach(a=>{
+    const on=a.dataset.c===id; a.classList.toggle('on',on);
+    if(on){ const box=$('#cats'); const l=a.offsetLeft - box.clientWidth/2 + a.clientWidth/2; box.scrollTo({left:l,behavior:'smooth'}); }
+  });
+}
+
+/* ---------- Folha do item ---------- */
+let lastFocus=null;
+function openScrim(scrim){
+  lastFocus=document.activeElement; scrim.hidden=false; document.body.style.overflow='hidden';
+  requestAnimationFrame(()=>{scrim.classList.add('open'); const x=scrim.querySelector('.x'); x&&x.focus();});
+}
+function closeScrim(scrim){
+  scrim.classList.remove('open'); document.body.style.overflow='';
+  setTimeout(()=>{scrim.hidden=true; lastFocus&&lastFocus.focus&&lastFocus.focus();},220);
+}
+function openItem(id, editKey){
+  const it=BY[id]; const editing = editKey? cart.find(l=>l.key===editKey):null;
+  let qty = editing?editing.qty:1;
+  const sel = it.groups.map((g,gi)=> editing? [...(editing.sel[gi]||[])] : (g.one&&g.req?[0]:[]));
+  const sheet=$('#itemSheet');
+  sheet.innerHTML = `<div class="sh-head"><h2 id="itTitle">${esc(it.n)}</h2><button class="x" type="button" aria-label="Fechar">×</button></div>
+  <div class="sh-body">
+    <div class="hero-art">${ART[it.art]}</div>
+    <h3 class="it-name">${esc(it.n)}</h3>
+    <p class="it-desc">${esc(it.d)}</p>
+    ${tagsHTML(it)?`<div style="margin-top:10px">${tagsHTML(it)}</div>`:''}
+    <div class="it-price">${priceHTML(it)}</div>
+    ${it.groups.map((g,gi)=>`<fieldset class="grp" data-g="${gi}"><legend><span>${esc(g.t)}</span>${g.req?'<small class="req">Obrigatório</small>':g.max?`<small>Até ${g.max}</small>`:'<small>Opcional</small>'}</legend>
+      ${g.o.map((o,oi)=>`<label class="opt"><span>${esc(o[0])}</span>${o[1]?`<em class="num">+ ${BRL.format(o[1])}</em>`:''}<input type="${g.one?'radio':'checkbox'}" name="g-${gi}" id="o-${gi}-${oi}" value="${oi}" ${sel[gi].includes(oi)?'checked':''}></label>`).join('')}
+    </fieldset>`).join('')}
+    <label class="lb" for="obs">Alguma observação?</label>
+    <textarea id="obs" rows="2" maxlength="140" placeholder="Ex.: maionese à parte, cortar ao meio…">${editing?esc(editing.obs):''}</textarea>
+  </div>
+  <div class="sh-foot">
+    <div class="step"><button type="button" data-d="-1" aria-label="Diminuir quantidade">−</button><output class="num" id="iq">${qty}</output><button type="button" data-d="1" aria-label="Aumentar quantidade">+</button></div>
+    <button class="cta" type="button" id="addBtn"><span>${editing?'Atualizar':'Adicionar'}</span><span class="num" id="addPrice"></span></button>
+  </div>`;
+  const unit=()=>it.p + it.groups.reduce((s,g,gi)=>s+sel[gi].reduce((a,oi)=>a+g.o[oi][1],0),0);
+  const refresh=()=>{
+    $('#iq',sheet).textContent=qty; $('[data-d="-1"]',sheet).disabled=qty<=1;
+    $('#addPrice',sheet).textContent=BRL.format(unit()*qty);
+    it.groups.forEach((g,gi)=>{ if(g.one||!g.max) return;
+      const full = sel[gi].length>=g.max;
+      sheet.querySelectorAll(`input[name="g-${gi}"]`).forEach(inp=>{ const dis = full && !inp.checked; inp.disabled=dis; inp.closest('.opt').classList.toggle('dis',dis); });
+    });
+  };
+  sheet.querySelectorAll('.grp input').forEach(inp=>inp.addEventListener('change',()=>{
+    const gi=+inp.name.slice(2), oi=+inp.value, g=it.groups[gi];
+    if(g.one) sel[gi]=[oi]; else sel[gi]= inp.checked? [...sel[gi],oi].sort((a,b)=>a-b) : sel[gi].filter(x=>x!==oi);
+    refresh();
+  }));
+  sheet.querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',()=>{qty=Math.max(1,Math.min(20,qty+ +b.dataset.d));refresh();}));
+  $('.x',sheet).addEventListener('click',()=>closeScrim($('#itemScrim')));
+  $('#addBtn',sheet).addEventListener('click',()=>{
+    const obs=$('#obs',sheet).value.trim();
+    const key = id+'|'+JSON.stringify(sel)+'|'+obs;
+    if(editing){ cart = cart.filter(l=>l.key!==editKey); }
+    const ex = cart.find(l=>l.key===key);
+    if(ex && !editing) ex.qty=Math.min(99,ex.qty+qty); else if(ex) ex.qty=qty; else cart.push({key,id,qty,sel,obs});
+    save(); updateCart(); renderMenu(); closeScrim($('#itemScrim'));
+    if(editing) setTimeout(openCart,260); else toast(`${qty}× ${it.n} na sacola`);
+  });
+  refresh(); openScrim($('#itemScrim'));
+}
+
+/* ---------- Sacola ---------- */
+const lineUnit = l=>{const it=BY[l.id];return it.p+it.groups.reduce((s,g,gi)=>s+(l.sel[gi]||[]).reduce((a,oi)=>a+g.o[oi][1],0),0);};
+const lineExtras = l=>{const it=BY[l.id];return it.groups.flatMap((g,gi)=>(l.sel[gi]||[]).map(oi=>g.o[oi][0]));};
+const subtotal = ()=>cart.reduce((s,l)=>s+lineUnit(l)*l.qty,0);
+const count = ()=>cart.reduce((s,l)=>s+l.qty,0);
+function updateCart(){
+  const c=count(); $('#cartbar').classList.toggle('hide',c===0);
+  $('#cbCount').textContent=c; $('#cbTotal').textContent=BRL.format(subtotal());
+  if(!$('#cartScrim').hidden) renderCart();
+}
+function orderText(){
+  const fee = form.mode==='entrega'?STORE.fee:0, sub=subtotal();
+  let t=`*Pedido · ${STORE.name}*\n\n`;
+  cart.forEach(l=>{ const it=BY[l.id]; t+=`${l.qty}× ${it.n} · ${BRL.format(lineUnit(l)*l.qty)}\n`; const ex=lineExtras(l); if(ex.length) t+=`   ${ex.join(', ')}\n`; if(l.obs) t+=`   Obs.: ${l.obs}\n`; });
+  t+=`\nSubtotal: ${BRL.format(sub)}\n`;
+  if(form.mode==='entrega') t+=`Entrega: ${BRL.format(fee)}\n`;
+  t+=`*Total: ${BRL.format(sub+fee)}*\n\n`;
+  t+=`Nome: ${form.name||'-'}\n`;
+  t+= form.mode==='entrega' ? `Entregar em: ${form.addr||'-'}\n` : `Vou retirar no balcão\n`;
+  t+=`Pagamento: ${form.pay}${form.pay==='Dinheiro'&&form.troco?` (troco para R$ ${form.troco})`:''}`;
+  return t;
+}
+function renderCart(){
+  const sheet=$('#cartSheet');
+  const keep = document.activeElement && document.activeElement.id;
+  if(!cart.length){
+    sheet.innerHTML=`<div class="sh-head"><h2 id="cartTitle">Sua sacola</h2><button class="x" type="button" aria-label="Fechar">×</button></div>
+      <div class="sh-body"><div class="cart-empty"><b>Sacola vazia</b>Escolha um lanche no cardápio para começar.</div></div>`;
+    $('.x',sheet).addEventListener('click',()=>closeScrim($('#cartScrim'))); return;
+  }
+  const sub=subtotal(), fee=form.mode==='entrega'?STORE.fee:0, total=sub+fee;
+  const short = form.mode==='entrega' && sub<STORE.minOrder;
+  const missing = !form.name.trim() || (form.mode==='entrega' && !form.addr.trim());
+  const blocked = short||missing;
+  sheet.innerHTML=`<div class="sh-head"><h2 id="cartTitle">Sua sacola</h2><button class="x" type="button" aria-label="Fechar">×</button></div>
+  <div class="sh-body">
+    ${cart.map(l=>{const it=BY[l.id];const ex=lineExtras(l);return `<div class="line">
+      <button class="mini" type="button" data-edit="${esc(l.key)}" aria-label="Editar ${esc(it.n)}" style="border:0">${ART[it.art]}</button>
+      <div style="min-width:0"><div class="ln">${esc(it.n)}</div>${ex.length?`<div class="lx">${esc(ex.join(' · '))}</div>`:''}${l.obs?`<div class="lx">Obs.: ${esc(l.obs)}</div>`:''}
+        <button type="button" data-edit="${esc(l.key)}" style="border:0;background:none;padding:4px 0 0;color:var(--ketchup);font-weight:600;font-size:13.5px">Editar</button></div>
+      <div class="lp"><span class="num">${BRL.format(lineUnit(l)*l.qty)}</span>
+        <div class="step"><button type="button" data-k="${esc(l.key)}" data-d="-1" aria-label="${l.qty===1?'Remover':'Diminuir'} ${esc(it.n)}">${l.qty===1?'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>':'−'}</button><output class="num">${l.qty}</output><button type="button" data-k="${esc(l.key)}" data-d="1" aria-label="Aumentar ${esc(it.n)}">+</button></div>
+      </div></div>`}).join('')}
+
+    <label class="lb">Como você quer receber?</label>
+    <div class="seg"><label><input type="radio" name="mode" id="m-ent" value="entrega" ${form.mode==='entrega'?'checked':''}>Entrega</label><label><input type="radio" name="mode" id="m-ret" value="retirada" ${form.mode==='retirada'?'checked':''}>Retirar no balcão</label></div>
+
+    <label class="lb" for="f-name">Seu nome</label>
+    <input class="field" id="f-name" autocomplete="name" value="${esc(form.name)}" placeholder="Como chamamos você?">
+    ${form.mode==='entrega'?`<label class="lb" for="f-addr">Endereço de entrega</label>
+    <textarea class="field" id="f-addr" rows="2" autocomplete="street-address" placeholder="Rua, número, bairro e ponto de referência">${esc(form.addr)}</textarea>`:`<p class="hint">Retirada na Rua das Acácias, 38. Fica pronto em cerca de 20 minutos.</p>`}
+
+    <label class="lb">Pagamento</label>
+    <div class="pay">${['Pix','Cartão','Dinheiro'].map(p=>`<label><input type="radio" name="pay" id="pay-${norm(p)}" value="${p}" ${form.pay===p?'checked':''}>${p}</label>`).join('')}</div>
+    ${form.pay==='Dinheiro'?`<label class="lb" for="f-troco">Troco para quanto?</label><input class="field num" id="f-troco" inputmode="decimal" value="${esc(form.troco)}" placeholder="Ex.: 100">`:''}
+    ${form.pay==='Cartão'?`<p class="hint">Levamos a maquininha. Débito e crédito.</p>`:''}
+    ${form.pay==='Pix'?`<p class="hint">A chave Pix é enviada junto com a confirmação do pedido.</p>`:''}
+
+    <div class="sum num">
+      <div><span>Subtotal</span><span>${BRL.format(sub)}</span></div>
+      ${form.mode==='entrega'?`<div><span>Taxa de entrega</span><span>${BRL.format(fee)}</span></div>`:`<div><span>Retirada</span><span>Grátis</span></div>`}
+      <div class="tot"><span>Total</span><span>${BRL.format(total)}</span></div>
+    </div>
+    ${short?`<div class="warn">Pedido mínimo para entrega é ${BRL.format(STORE.minOrder)}. Faltam ${BRL.format(STORE.minOrder-sub)}.</div>`:''}
+    ${!short&&missing?`<p class="hint">Preencha ${!form.name.trim()?'seu nome':''}${!form.name.trim()&&form.mode==='entrega'&&!form.addr.trim()?' e ':''}${form.mode==='entrega'&&!form.addr.trim()?'o endereço':''} para enviar.</p>`:''}
+  </div>
+  <div class="sh-foot foot-col">
+    <a class="cta" id="send" target="_blank" rel="noopener" ${blocked?'aria-disabled="true"':''} href="${blocked?'#':`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(orderText())}`}"><span>Enviar pedido no WhatsApp</span><span class="num">${BRL.format(total)}</span></a>
+    <div class="foot-row"><button class="ghost" type="button" id="copy" style="flex:1">Copiar pedido</button><button class="ghost" type="button" id="clearCart">Esvaziar</button></div>
+  </div>`;
+  $('.x',sheet).addEventListener('click',()=>closeScrim($('#cartScrim')));
+  sheet.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{
+    const l=cart.find(x=>x.key===b.dataset.k); if(!l) return;
+    l.qty+= +b.dataset.d; if(l.qty<=0) cart=cart.filter(x=>x!==l);
+    save(); updateCart(); renderMenu();
+  }));
+  sheet.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{
+    const l=cart.find(x=>x.key===b.dataset.edit); closeScrim($('#cartScrim')); setTimeout(()=>openItem(l.id,l.key),240);
+  }));
+  sheet.querySelectorAll('input[name="mode"]').forEach(r=>r.addEventListener('change',()=>{form.mode=r.value;save();renderCart();}));
+  sheet.querySelectorAll('input[name="pay"]').forEach(r=>r.addEventListener('change',()=>{form.pay=r.value;save();renderCart();}));
+  const bind=(id,k)=>{const el=$('#'+id,sheet); if(!el) return; el.addEventListener('input',()=>{form[k]=el.value;save();});el.addEventListener('change',()=>renderCart());};
+  bind('f-name','name'); bind('f-addr','addr'); bind('f-troco','troco');
+  $('#send',sheet).addEventListener('click',e=>{ if($('#send',sheet).getAttribute('aria-disabled')==='true'){e.preventDefault(); const f=$('#f-name',sheet); (!form.name.trim()?f:$('#f-addr',sheet)||f).focus(); }});
+  $('#copy',sheet).addEventListener('click',()=>{
+    const txt=orderText();
+    navigator.clipboard.writeText(txt).then(()=>toast('Pedido copiado')).catch(()=>{
+      const ta=document.createElement('textarea'); ta.value=txt; ta.className='field'; ta.rows=8; ta.readOnly=true;
+      $('.sh-body',sheet).appendChild(ta); ta.select(); toast('Selecione e copie o texto abaixo');
+    });
+  });
+  const clr=$('#clearCart',sheet);
+  clr.addEventListener('click',()=>{
+    if(clr.dataset.sure){ cart=[]; save(); updateCart(); renderMenu(); renderCart(); return; }
+    clr.dataset.sure='1'; clr.textContent='Confirmar?'; clr.style.color='var(--ketchup)';
+    setTimeout(()=>{ if(clr.isConnected){ delete clr.dataset.sure; clr.textContent='Esvaziar'; clr.style.color=''; } },3000);
+  });
+  if(keep){ const el=document.getElementById(keep); el&&el.focus(); }
+}
+function openCart(){ renderCart(); openScrim($('#cartScrim')); }
+
+/* ---------- Toast ---------- */
+let tt; function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),1800); }
+
+/* ---------- Eventos ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.item,.fcard'); if(b) openItem(b.dataset.id);
+});
+['itemScrim','cartScrim'].forEach(id=>{ const s=$('#'+id); s.addEventListener('click',e=>{ if(e.target===s) closeScrim(s); }); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ ['itemScrim','cartScrim'].forEach(id=>{const s=$('#'+id); if(!s.hidden) closeScrim(s);}); }});
+$('#openCart').addEventListener('click',openCart);
+const q=$('#q');
+q.addEventListener('input',()=>{ query=norm(q.value.trim()); $('#qclear').hidden=!q.value; renderMenu(); });
+$('#qclear').addEventListener('click',()=>{ q.value=''; query=''; $('#qclear').hidden=true; renderMenu(); q.focus(); });
+document.querySelectorAll('.fchip').forEach(b=>b.addEventListener('click',()=>{
+  const f=b.dataset.f; filters.has(f)?filters.delete(f):filters.add(f); b.setAttribute('aria-pressed',filters.has(f)); renderMenu();
+}));
+
+renderHours(); setInterval(renderHours,60000);
+renderCats(); renderFeatured(); renderMenu(); updateCart();
+})();
+</script>
+</body></html>
